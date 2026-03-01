@@ -62,7 +62,7 @@ ui/Thumbs.db
 ui/*.swp
 ui/*.swo
 # 7. 可选：如果使用Vue CLI的配置文件，按需忽略
-ui/vue.config.js
+#ui/vue.config.js
 # ui/vue.config.ts
 # 8. 可选：锁文件（建议保留，团队协作时注释掉以下行）
 #ui/package-lock.json
