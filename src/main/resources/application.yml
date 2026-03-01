@@ -1,0 +1,97 @@
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    max-swallow-size: -1
+
+# 数据库配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hospital_system?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+  application:
+    name: hospital-system
+  # 资源配置（Spring Boot 3 默认对静态资源有更好的处理）
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher # 提高与某些插件的兼容性
+  servlet:
+    multipart:
+      enabled: true                  # 启用文件上传
+      max-file-size: 100MB           # 单个文件最大大小
+      max-request-size: 200MB        # 单次请求总文件大小上限
+      file-size-threshold: 1MB       # 超过该大小的文件会写入磁盘
+      location: ${java.io.tmpdir}    # 临时文件存储位置
+
+  # Redis配置：注意层级！和datasource、servlet同级，都在spring节点下（不要嵌套在minio里）
+  data:
+    redis:
+      host: localhost # 本地Redis地址，优先用127.0.0.1（兼容性更好）
+      port: 6379 # Redis默认端口
+      password: "" # 无密码留空（必须添加，避免默认密码匹配失败）
+      timeout: 3000ms # 可选：添加连接超时时间，避免连接无响应
+      database: 3
+      lettuce:
+        pool:
+          max-active: 8 # 最大连接数
+          max-idle: 8 # 最大空闲连接数
+          min-idle: 2 # 最小空闲连接数
+          max-wait: 1000ms # 连接获取超时时间
+
+# MyBatis原生配置
+mybatis:
+  mapper-locations: classpath:mapper-xml/**/*.xml  # XML映射文件路径
+  type-aliases-package: com.hospital.entity        # 实体类别名包
+  configuration:
+    map-underscore-to-camel-case: true             # 下划线转驼峰
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 日志实现
+    default-statement-timeout: 30                  # 默认超时时间
+    cache-enabled: true                            # 开启二级缓存
+
+# JWT配置
+jwt:
+  secret: hospital-system-2026-secret-key-1234567890 # 自定义密钥（建议生产环境用更长的随机字符串）
+  expiration: 7200000 # 2小时（毫秒）
+  refresh-expiration: 604800000 # 7天（毫秒）
+
+# MinIO配置
+minio:
+  endpoint: http://192.168.43.20:19966
+  accessKey: admin
+  secretKey: myj040520
+  bucketName: my-project
+
+# Spring Doc配置 (适配 SpringDoc 2.x / OpenAPI 3.1)
+springdoc:
+  api-docs:
+    path: /v3/api-docs # 默认路径，建议保留
+  swagger-ui:
+    path: /doc.html # 访问地址：http://localhost:8080/doc.html
+    # 注意：SpringDoc 2.x 中部分参数名使用短横线分隔
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    # 自动尝试匹配生成的接口，不需要手动指定 config-url 和 url
+    display-request-duration: true
+
+# 日志配置
+logging:
+  level:
+    com.sme: info
+    # MyBatis 3.0+ 适配 Spring Boot 3 的日志监听
+    com.sme.mapper: debug
+    org.springframework.web: info
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+
+# 分页插件配置 (适配 PageHelper 2.x)
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql

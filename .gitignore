@@ -1,0 +1,70 @@
+# 原有后端忽略规则
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# ===================== 新增：ui目录下Vue前端忽略规则 =====================
+# 1. ui目录下的前端依赖（核心，必须忽略）
+ui/node_modules/
+# 2. ui目录下的构建产物（Vite/Vue CLI打包目录）
+ui/dist/
+ui/dist-ssr/
+# 3. 前端环境变量文件（含敏感配置，如接口地址、密钥）
+ui/.env
+ui/.env.local
+ui/.env.development.local
+ui/.env.test.local
+ui/.env.production.local
+# 4. 包管理日志/缓存
+ui/npm-debug.log*
+ui/yarn-debug.log*
+ui/yarn-error.log*
+ui/pnpm-debug.log*
+ui/.eslintcache
+# 5. Vue CLI/Vite临时文件
+ui/.pnpm
+ui/.pnpm-store
+ui/.pnp
+ui/.pnp.js
+# 6. 系统/编辑器临时文件
+ui/.DS_Store
+ui/Thumbs.db
+ui/*.swp
+ui/*.swo
+# 7. 可选：如果使用Vue CLI的配置文件，按需忽略
+ui/vue.config.js
+# ui/vue.config.ts
+# 8. 可选：锁文件（建议保留，团队协作时注释掉以下行）
+ui/package-lock.json
+ui/yarn.lock
+ui/pnpm-lock.yaml
