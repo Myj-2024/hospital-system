@@ -180,7 +180,7 @@ const refreshCaptcha = () => {
   align-items: center;
   position: relative;
   overflow: hidden;
-  background: #e0e5f4;
+  background: #f7fafd;
   backdrop-filter: blur(40px);
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
 }
@@ -226,7 +226,7 @@ const refreshCaptcha = () => {
 /* 左侧 Banner */
 .login-banner {
   flex: 1;
-  background: linear-gradient(150deg, rgba(45, 123, 239, 0.7) 0%, rgba(239, 247, 253, 0.7) 80%);
+  background: linear-gradient(150deg, rgba(45, 123, 239, 0.7) 0%, rgba(239, 247, 253, 0.7) 70%);
   position: relative;
   display: flex;
   padding: 60px;
@@ -236,9 +236,9 @@ const refreshCaptcha = () => {
 /* 修改点：图片作为背景铺满 */
 .bg-img {
   position: absolute;
-  top: 30%;
-  left: 0;
-  width: 100%;
+  top: 45%;
+  left: 25%;
+  width: 75%;
   z-index: 1;
   opacity: 0.08;
 }
@@ -286,7 +286,7 @@ const refreshCaptcha = () => {
 
 .main-title, .sub-title {
   font-size: 40px;
-  color: #182643;
+  color: #38579a;
   font-weight: 800;
   line-height: 1.1;
   margin: 10px 0;
@@ -295,13 +295,13 @@ const refreshCaptcha = () => {
 .accent-line {
   width: 240px;
   height: 2px;
-  background: #182643FF;
+  background: #38579a;
   border-radius: 3px;
   margin: 30px 0;
 }
 
 .english-slogan p {
-  color: #182643FF;
+  color: #38579a;
   font-size: 15px;
   letter-spacing: 3px;
   margin: 4px 0;
@@ -312,12 +312,12 @@ const refreshCaptcha = () => {
   margin-top: 60px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
 }
 
 .tag-item {
   color: #1d1e20;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .banner-deco {
