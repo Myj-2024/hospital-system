@@ -65,6 +65,6 @@ ui/*.swo
 ui/vue.config.js
 # ui/vue.config.ts
 # 8. 可选：锁文件（建议保留，团队协作时注释掉以下行）
-ui/package-lock.json
+#ui/package-lock.json
 ui/yarn.lock
 ui/pnpm-lock.yaml
