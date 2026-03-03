@@ -87,7 +87,7 @@
                   class="captcha-input-box"
               />
               <div class="captcha-img-wrapper" @click="refreshCaptcha">
-                <img src="https://via.placeholder.com/120x40?text=8A2F&bg=f0f2f5&fg=2d5af1" alt="captcha"/>
+                <img :src="captchaImg" alt="captcha"/>
               </div>
             </div>
           </el-form-item>
@@ -114,19 +114,22 @@
     </div>
   </div>
 </template>
-
 <script setup>
-import {ref, reactive} from 'vue'
+import {ref, reactive, onMounted} from 'vue'
 import {useRouter} from 'vue-router'
 import {useUserStore} from '@/store/modules/user'
 import {User, Lock, CircleCheck, OfficeBuilding} from '@element-plus/icons-vue'
 import {ElMessage} from 'element-plus'
+import {getCaptcha} from '@/api/user/index.js'   // 🔥 新增
 
 const router = useRouter()
 const userStore = useUserStore()
 const loginFormRef = ref(null)
 const loading = ref(false)
 const rememberMe = ref(false)
+
+const captchaImg = ref('')
+const captchaKey = ref('')
 
 const loginForm = reactive({
   username: '',
@@ -141,36 +144,68 @@ const loginRules = {
   captcha: [{required: true, message: '请输入验证码', trigger: 'blur'}]
 }
 
+/**
+ * 获取验证码
+ */
+const loadCaptcha = async () => {
+  try {
+    const res = await getCaptcha()
+    captchaImg.value = 'data:image/png;base64,' + res.data.image
+    captchaKey.value = res.data.key
+  } catch (e) {
+    ElMessage.error('验证码加载失败')
+  }
+}
+
+const refreshCaptcha = () => {
+  loadCaptcha()
+}
+/**
+ * 登录
+ */
 const handleLogin = async () => {
   if (!loginFormRef.value) return
+
   await loginFormRef.value.validate(async (valid) => {
     if (valid) {
       loading.value = true
       try {
-        await userStore.login(loginForm)
+        // 调用 store 登录
+        await userStore.login({
+          ...loginForm,
+          captchaKey: captchaKey.value
+        })
+
         ElMessage.success('登录成功')
+
+        // 🔥 关键修正点：补全父级路径 /admin
+        // 必须与 router/index.js 中定义的完整路径完全一致
         const redirectPath = {
-          doctor: '/doctor/appointment',
-          nurse: '/nurse/queue',
+          doctor: '/admin/doctor/appointment',
+          nurse: '/admin/nurse/queue',
           admin: '/admin/statistics'
         }
-        router.push(redirectPath[loginForm.role] || '/')
+
+        // 获取目标路径，如果匹配不到则默认去看板
+        const target = redirectPath[loginForm.role] || '/admin/statistics'
+
+        console.log('正在跳转至：', target) // 调试用
+        router.push(target)
+
       } catch (error) {
-        ElMessage.error(error.message || '登录失败')
-        refreshCaptcha()
+        console.error('登录失败详情：', error)
+        refreshCaptcha() // 登录失败自动刷新验证码
       } finally {
         loading.value = false
       }
     }
   })
 }
-
-const refreshCaptcha = () => {
-  console.log('刷新验证码')
-}
+onMounted(() => {
+  loadCaptcha()
+})
 </script>
-
-<style scoped>
+<style>
 /* 全屏容器及背景效果 */
 .login-container {
   height: 100vh;
@@ -362,29 +397,6 @@ const refreshCaptcha = () => {
   margin-bottom: 30px;
 }
 
-.role-tabs :deep(.el-tabs__item) {
-  font-size: 16px;
-  color: #64748b;
-  height: 50px;
-}
-
-.role-tabs :deep(.el-tabs__item.is-active) {
-  color: #2d5af1;
-  font-weight: 700;
-}
-
-.custom-form :deep(.el-input__wrapper) {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  box-shadow: none !important;
-}
-
-.custom-form :deep(.el-input__wrapper.is-focus) {
-  border-color: #2d5af1;
-  background: #fff;
-}
-
 .captcha-row {
   display: flex;
   width: 100%;
@@ -397,7 +409,7 @@ const refreshCaptcha = () => {
 }
 
 .captcha-img-wrapper {
-  width: 120px;
+  width: 110px;
   height: 44px;
   cursor: pointer;
   border-radius: 8px;
@@ -408,9 +420,9 @@ const refreshCaptcha = () => {
 }
 
 .captcha-img-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 90%;
+  height: 90%;
+  margin: auto;
 }
 
 .form-options {
@@ -438,7 +450,7 @@ const refreshCaptcha = () => {
 }
 
 .form-footer {
-  margin-top: auto;
+  margin-top: 20px;
   text-align: center;
 }
 

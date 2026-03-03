@@ -1,0 +1,107 @@
+/* ========================
+   全局基础重置
+======================== */
+
+/* 1. 盒模型统一 */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* 2. 去除默认外边距 */
+html,
+body,
+h1, h2, h3, h4, h5, h6,
+p,
+ul, ol,
+li,
+figure,
+blockquote,
+dl,
+dd {
+    margin: 0;
+    padding: 0;
+}
+
+/* 3. 去除列表样式 */
+ul, ol {
+    list-style: none;
+}
+
+/* 4. 图片默认行为优化 */
+img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+}
+
+/* 5. 表单元素继承字体 */
+input, button, textarea, select {
+    font: inherit;
+}
+
+/* 6. 基础 body 设置 */
+body {
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/*移出浏览器自动填充样式*/
+.login-container .el-input__inner:-webkit-autofill,
+.login-container .el-input__inner:-webkit-autofill:hover,
+.login-container .el-input__inner:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+    -webkit-text-fill-color: #1e293b !important;
+}
+
+/*自定义登录页表单样式*/
+.login-container .custom-form{
+    .el-input__wrapper {
+        background-color: transparent !important;
+        background-image: none !important;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        box-shadow: none !important;
+        transition: all 0.3s ease;
+        &.is-focus {
+            box-shadow: 0 0 0 1px #2d5af1 inset !important;
+        }
+    }
+    .el-input__inner {
+        background-color: transparent !important;
+        &:-webkit-autofill {
+            transition: background-color 5000s ease-in-out 0s !important;
+            -webkit-text-fill-color: #606266 !important;
+        }
+    }
+}
+/*自定义tabs样式*/
+.login-container .role-tabs :deep(.el-tabs__item) {
+    font-size: 16px;
+    color: #64748b;
+    height: 50px;
+}
+
+.login-container .role-tabs :deep(.el-tabs__item.is-active) {
+    color: #2d5af1;
+    font-weight: 700;
+}
+
+
+
+/*自定义layout页面动画样式*/
+.layout-page .fade-slide-enter-active, .fade-slide-leave-active {
+    transition: all 0.3s ease;
+}
+
+.layout-page .fade-slide-enter-from {
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+.layout-page .fade-slide-leave-to {
+    opacity: 0;
+    transform: translateX(10px);
+}

@@ -6,6 +6,7 @@ import com.hospital.common.utils.JwtUtil;
 import com.hospital.dto.user.UserLoginDTO;
 import com.hospital.service.user.UserService;
 import com.hospital.common.exception.BusinessException;
+import com.hospital.common.utils.RedisUtil;
 import com.vo.UserLoginVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,6 +28,9 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
     /**
      * 用户登录
      */
@@ -34,26 +38,42 @@ public class AuthController {
     @Operation(summary = "用户登录", description = "根据用户名和密码获取登录凭证")
     public Result<UserLoginVO> login(
             @Parameter(description = "登录信息", required = true)
-            @RequestBody UserLoginDTO userLoginDTO){
+            @RequestBody UserLoginDTO userLoginDTO) {
+
         try {
-            // 1. 参数非空校验
+            // 1. 参数校验
             if (!StringUtils.hasText(userLoginDTO.getUsername()) ||
                     !StringUtils.hasText(userLoginDTO.getPassword())) {
                 return Result.sysError(MessageConstant.PARAMETER_ERROR);
             }
 
-            // 2. 验证码校验逻辑 (此处仅做非空检查，具体校验逻辑需根据你的验证码组件实现)
-            if (!StringUtils.hasText(userLoginDTO.getCaptcha())) {
+            // 2. 验证码校验
+            if (!StringUtils.hasText(userLoginDTO.getCaptcha()) ||
+                    !StringUtils.hasText(userLoginDTO.getCaptchaKey())) {
                 return Result.sysError("验证码不能为空");
             }
+
+            String redisKey = "captcha:" + userLoginDTO.getCaptchaKey();
+            String redisCode = redisUtil.get(redisKey);
+
+            if (!StringUtils.hasText(redisCode)) {
+                return Result.sysError("验证码已过期");
+            }
+
+            if (!redisCode.equalsIgnoreCase(userLoginDTO.getCaptcha())) {
+                return Result.sysError("验证码错误");
+            }
+
+            // 校验成功后删除验证码（防止重复使用）
+            redisUtil.delete(redisKey);
 
             log.info("用户登录请求：{}", userLoginDTO.getUsername());
             UserLoginVO userLoginVO = userService.login(userLoginDTO);
             log.info("用户登录成功：{}", userLoginDTO.getUsername());
+
             return Result.success(userLoginVO);
 
         } catch (BusinessException e) {
-            // 捕获预期的业务异常（如：用户名不存在，密码错误）
             log.warn("登录业务异常：{}", e.getMessage());
             return Result.sysError(e.getMessage());
         } catch (Exception e) {
@@ -69,7 +89,7 @@ public class AuthController {
     @Operation(summary = "刷新Token", description = "使用有效的旧Token获取新Token")
     public Result<String> refreshToken(
             @Parameter(description = "Bearer Token", required = true)
-            @RequestHeader("Authorization") String token){
+            @RequestHeader("Authorization") String token) {
         try {
             if (!StringUtils.hasText(token) || !token.startsWith("Bearer ")) {
                 return Result.sysError("Token格式错误");

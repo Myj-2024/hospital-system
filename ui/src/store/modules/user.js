@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import { login } from '@/api/user' // 确保 api/user/index.js 导出了 login
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import {defineStore} from 'pinia'
+import {login} from '@/api/user'
+import {getToken, setToken, removeToken} from '@/utils/auth'
 
 export const useUserStore = defineStore('user', {
     state: () => ({
@@ -13,13 +13,23 @@ export const useUserStore = defineStore('user', {
         // 登录逻辑
         async login(userInfo) {
             try {
-                const response = await login(userInfo)
-                // 假设后端返回结构为 { code: 200, data: { token: 'xxx' } }
-                const { token } = response.data
+                const res = await login(userInfo)
+
+                // 核心修正点：
+                // 1. 根据你的拦截器 return res，这里的 res 就是 { code: 200, data: ..., msg: ... }
+                // 2. 兼容两种常见的后端写法：data 是对象 { token: '...' } 或 data 直接是字符串 '...'
+                const token = typeof res.data === 'object' ? res.data.token : res.data
+
+                if (!token) {
+                    throw new Error('登录返回的 Token 为空，请检查接口')
+                }
+
                 this.token = token
-                setToken(token) // 调用 utils/auth.js 中的方法
-                return Promise.resolve()
+                setToken(token)
+
+                return Promise.resolve(res)
             } catch (error) {
+                console.error('Login Store Error:', error)
                 return Promise.reject(error)
             }
         },
@@ -28,7 +38,8 @@ export const useUserStore = defineStore('user', {
         logout() {
             this.token = ''
             removeToken()
-            // 如果有路由逻辑，可以在这里重置
+            localStorage.clear() // 清除可能的残留
+            sessionStorage.clear()
         }
     }
 })

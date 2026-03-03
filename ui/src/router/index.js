@@ -1,9 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
-
-// 导入页面组件（先创建空组件，后续补充）
-import Login from '../views/login/index.vue'
-import PatientLayout from '../components/Layout/index.vue'
-import NotFound from '../views/error/404.vue'
+import {createRouter, createWebHistory} from 'vue-router'
 
 const routes = [
     {
@@ -13,22 +8,69 @@ const routes = [
     {
         path: '/login',
         name: 'Login',
-        component: Login
+        component: () => import('../views/login/index.vue')
     },
     {
-        path: '/patient',
-        name: 'Patient',
-        component: PatientLayout,
+        path: '/admin',
+        component: () => import('../components/Layout/index.vue'),
+        redirect: '/admin/statistics',
         children: [
-            { path: 'appointment', component: () => import('../views/patient/appointment/index.vue') },
-            { path: 'queue', component: () => import('../views/patient/queue/index.vue') },
-            { path: 'payment', component: () => import('../views/patient/payment/index.vue') },
-            { path: 'medical', component: () => import('../views/patient/medical/index.vue') }
+            {
+                path: '/admin/statistics',
+                name: 'Statistics',
+                component: () => import('../views/admin/statistics/index.vue'),
+                meta: {title: '数据看板', icon: 'DataAnalysis'}
+            },
+            // 医生工作台模块 - 统一使用绝对路径确保匹配
+            {
+                path: '/admin/doctor/appointment',
+                name: 'DoctorAppointment',
+                component: () => import('../views/doctor/appointment/index.vue'),
+                meta: {title: '接诊列表', icon: 'List'}
+            },
+            {
+                path: '/admin/doctor/diagnosis',
+                name: 'DoctorDiagnosis',
+                component: () => import('../views/doctor/diagnosis/index.vue'),
+                meta: {title: '接诊工作台', icon: 'Monitor'}
+            },
+            // 护士站模块
+            {
+                path: '/admin/nurse/queue',
+                name: 'NurseQueue',
+                component: () => import('../views/nurse/queue/index.vue'),
+                meta: {title: '排队叫号', icon: 'Microphone'}
+            },
+            {
+                path: '/admin/nurse/prescription',
+                name: 'NursePrescription',
+                component: () => import('../views/nurse/prescription/index.vue'),
+                meta: {title: '处方处理', icon: 'Files'}
+            },
+            // 系统管理模块
+            {
+                path: '/admin/system/doctor',
+                name: 'DoctorManage',
+                component: () => import('../views/admin/system/doctor/index.vue'),
+                meta: {title: '医生管理', icon: 'User'}
+            },
+            {
+                path: '/admin/system/nurse',
+                name: 'NurseManage',
+                component: () => import('../views/admin/system/nurse/index.vue'),
+                meta: {title: '护士管理', icon: 'Service'}
+            },
+            {
+                path: '/admin/system/role',
+                name: 'RoleManage',
+                component: () => import('../views/admin/system/index.vue'),
+                meta: {title: '角色管理', icon: 'Lock'}
+            }
         ]
     },
     {
         path: '/404',
-        component: NotFound
+        component: () => import('../views/error/404.vue')
     },
     {
         path: '/:pathMatch(.*)*',

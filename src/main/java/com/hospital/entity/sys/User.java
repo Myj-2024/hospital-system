@@ -1,16 +1,15 @@
 package com.hospital.entity.sys;
 
+import com.hospital.entity.base.BaseEntity;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
-public class User implements Serializable {
+public class User extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long id;
 
     /**
      * 用户名
@@ -47,13 +46,4 @@ public class User implements Serializable {
      */
     private Integer status;
 
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 }
