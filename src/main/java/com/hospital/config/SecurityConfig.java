@@ -9,6 +9,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
@@ -16,7 +20,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. 禁用 CSRF（API 场景下无需 CSRF）
+                // 1. 禁用 CSRF
                 .csrf(AbstractHttpConfigurer::disable)
                 // 2. 禁用 HTTP Basic 认证
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -24,16 +28,19 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 // 4. 禁用注销功能
                 .logout(AbstractHttpConfigurer::disable)
-                // 5. 配置会话策略为无状态（REST API 最佳实践）
+                // 5. 配置会话策略为无状态
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 6. 授权规则
+                // 6. 启用CORS（使用自定义配置）
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // 7. 授权规则（核心：放行OPTIONS请求）
                 .authorizeHttpRequests(auth -> auth
-                        // 放行登录接口
-                        .requestMatchers("/admin/auth/login").permitAll()
-                        // 放行 Swagger 文档接口（如果需要）
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
-                        .permitAll()
-                        // 其他所有请求都允许（实际认证由 JWT 拦截器处理）
+                        // 放行登录/刷新Token接口
+                        .requestMatchers("/admin/auth/login", "/admin/auth/refresh").permitAll()
+                        // 放行Swagger文档
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/doc.html").permitAll()
+                        // 关键修复：放行所有OPTIONS预检请求
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        // 其他请求允许（JWT拦截器做细粒度校验）
                         .anyRequest().permitAll()
                 );
 
@@ -46,5 +53,24 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * 适配Security的CORS配置（与CorsConfig保持一致）
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOriginPattern("http://localhost:5173");
+        config.addAllowedOriginPattern("http://192.168.5.65:5173");
+        config.addAllowedHeader("Authorization");
+        config.addAllowedHeader("Content-Type");
+        config.addAllowedMethod("*");
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }

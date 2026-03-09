@@ -1,17 +1,26 @@
-// 定义存储的 Key
-const TokenKey = 'Admin-Token'
+// @/utils/auth.js 完整修复版
+// Token 存储的 key（必须统一）
+const TOKEN_KEY = 'token'
 
-// 获取 Token
+/**
+ * 获取 Token
+ * @returns {string|null}
+ */
 export function getToken() {
-    return localStorage.getItem(TokenKey)
+    return localStorage.getItem(TOKEN_KEY)
 }
 
-// 设置 Token (这就是你报错缺失的导出)
+/**
+ * 设置 Token
+ * @param {string} token - 要存储的 Token
+ */
 export function setToken(token) {
-    return localStorage.setItem(TokenKey, token)
+    localStorage.setItem(TOKEN_KEY, token)
 }
 
-// 移除 Token
+/**
+ * 移除 Token
+ */
 export function removeToken() {
-    return localStorage.removeItem(TokenKey)
+    localStorage.removeItem(TOKEN_KEY)
 }

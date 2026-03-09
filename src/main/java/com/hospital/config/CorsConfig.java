@@ -1,51 +1,47 @@
 package com.hospital.config;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 /**
- * 跨域配置类
+ * 跨域配置类（提升优先级，修复请求头/响应头配置）
  */
 @Configuration
 public class CorsConfig {
 
-    /**
-     * 创建CorsFilter过滤器Bean
-     * 这个过滤器用于处理跨域请求
-     * @return
-     */
     @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE) // 确保CorsFilter在所有Filter之前执行
     public CorsFilter corsFilter(){
-        //创建跨域配置对象
         CorsConfiguration config = new CorsConfiguration();
 
-        //允许所有源进行跨域请求
+        // 允许前端域名（精准配置）
         config.addAllowedOriginPattern("http://localhost:5173");
         config.addAllowedOriginPattern("http://192.168.5.65:5173");
-        //允许所有请求方法进行跨域请求
-        config.addAllowedHeader("*");
 
-        //允许哪些HTTP方法进行跨域请求
-        config.addAllowedMethod( "*");
+        // 关键修复：显式允许Authorization请求头（*不包含自定义头）
+        config.addAllowedHeader("Authorization");
+        config.addAllowedHeader("Content-Type");
+        config.addAllowedHeader("X-Requested-With");
 
-        //是否允许携带认证 信息
+        // 暴露响应头
+        config.addExposedHeader("Authorization");
+        config.addExposedHeader("Set-Cookie");
+
+        // 允许所有HTTP方法
+        config.addAllowedMethod("*");
+        // 允许携带Cookie/Token
         config.setAllowCredentials(true);
-
-        //预检请求的缓存时间
+        // 预检请求缓存时间（1小时）
         config.setMaxAge(3600L);
 
-        //创建配置源，将上面的所有配置添加到配置源中
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        //将配置映射到所有路径
         source.registerCorsConfiguration("/**", config);
 
-        //创建CorsFilter过滤器对象，并返回
         return new CorsFilter(source);
     }
 }
-

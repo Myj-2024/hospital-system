@@ -120,7 +120,7 @@ import {useRouter} from 'vue-router'
 import {useUserStore} from '@/store/modules/user'
 import {User, Lock, CircleCheck, OfficeBuilding} from '@element-plus/icons-vue'
 import {ElMessage} from 'element-plus'
-import {getCaptcha} from '@/api/user/index.js'   // 🔥 新增
+import {getCaptcha} from '@/api/user/index.js'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -160,6 +160,7 @@ const loadCaptcha = async () => {
 const refreshCaptcha = () => {
   loadCaptcha()
 }
+
 /**
  * 登录
  */
@@ -178,22 +179,18 @@ const handleLogin = async () => {
 
         ElMessage.success('登录成功')
 
-        // 🔥 关键修正点：补全父级路径 /admin
-        // 必须与 router/index.js 中定义的完整路径完全一致
-        const redirectPath = {
-          doctor: '/admin/doctor/appointment',
-          nurse: '/admin/nurse/queue',
-          admin: '/admin/statistics'
+        // 核心修改：根据用户实际角色（store中存储的）跳转专属页面
+        const roleHomeMap = {
+          admin: '/admin/statistics',
+          doctor: '/doctor/appointment',
+          nurse: '/nurse/queue'
         }
-
-        // 获取目标路径，如果匹配不到则默认去看板
-        const target = redirectPath[loginForm.role] || '/admin/statistics'
-
-        console.log('正在跳转至：', target) // 调试用
-        router.push(target)
+        const targetPath = roleHomeMap[userStore.role] || '/404'
+        router.push(targetPath)
 
       } catch (error) {
         console.error('登录失败详情：', error)
+        ElMessage.error(error.message || '登录失败，请检查账号密码')
         refreshCaptcha() // 登录失败自动刷新验证码
       } finally {
         loading.value = false
@@ -201,12 +198,15 @@ const handleLogin = async () => {
     }
   })
 }
+
 onMounted(() => {
   loadCaptcha()
+  // 初始化角色（页面刷新后恢复）
+  // userStore.initRole()
 })
 </script>
 <style>
-/* 全屏容器及背景效果 */
+/* 原有样式保持不变，此处省略（与你提供的一致） */
 .login-container {
   height: 100vh;
   width: 100vw;
@@ -220,7 +220,6 @@ onMounted(() => {
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
-/* 毛玻璃装饰圆 */
 .glass-circle {
   position: absolute;
   border-radius: 50%;
@@ -244,7 +243,6 @@ onMounted(() => {
   background: rgba(48, 244, 169, 0.15);
 }
 
-/* 登录主卡片 */
 .login-box {
   width: 1100px;
   height: 650px;
@@ -258,7 +256,6 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* 左侧 Banner */
 .login-banner {
   flex: 1;
   background: linear-gradient(150deg, rgba(45, 123, 239, 0.7) 0%, rgba(239, 247, 253, 0.7) 70%);
@@ -268,7 +265,6 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* 修改点：图片作为背景铺满 */
 .bg-img {
   position: absolute;
   top: 45%;
@@ -366,7 +362,6 @@ onMounted(() => {
   z-index: 1;
 }
 
-/* 右侧表单区 */
 .login-form-section {
   width: 500px;
   padding: 70px 65px;

@@ -26,6 +26,4 @@ public class BaseEntity implements Serializable {
      * 更新时间
      */
     private Date updateTime;
-
-
 }

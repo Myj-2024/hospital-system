@@ -1,6 +1,5 @@
 package com.hospital.common.utils;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hospital.common.constant.UserContext;
 import com.hospital.common.response.Result;
@@ -21,10 +20,10 @@ import java.io.PrintWriter;
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
 
-    // 修复：正确初始化ObjectMapper（移除null参数）
+    // 初始化ObjectMapper
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // 注入实例化的JwtUtil（不再用静态调用）
+    // 注入JwtUtil
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -37,7 +36,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         String method = request.getMethod();
         log.info("拦截请求：{} {}", method, url);
 
-        // 修复：精确匹配登录接口（避免模糊匹配导致的问题）
+        // 放行登录接口
         if ("/admin/auth/login".equals(url) && "POST".equals(method)) {
             return true;
         }
@@ -47,24 +46,27 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
 
         String token = request.getHeader("Authorization");
+        log.debug("获取到的Token头：{}", token);
 
         // 验证Token存在且格式正确
         if (!StringUtils.hasText(token) || !token.startsWith("Bearer ")) {
             log.warn("Token不存在或格式错误：{}", token);
+            // 关键修复：添加跨域响应头
             return handleUnauthorized(response, "未授权，请先登录");
         }
 
-        // 提取纯Token
+        // 提取纯Token（去除Bearer前缀并去空格）
         String realToken = token.substring(7).trim();
+        log.debug("提取的纯Token：{}", realToken);
 
-        // 使用实例化的JwtUtil验证Token（核心修复）
+        // 验证Token有效性
         if (jwtUtil.validateToken(realToken)) {
             // 设置用户上下文
             Long userId = jwtUtil.getIdFromToken(realToken);
             String userName = jwtUtil.getUserNameFromToken(realToken);
             UserContext.setUserId(userId);
             UserContext.setUsername(userName);
-            log.debug("Token验证通过，用户：{}", userName);
+            log.info("Token验证通过，用户：{}", userName);
             return true;
         } else {
             log.warn("Token无效或已过期：{}", realToken);
@@ -73,7 +75,7 @@ public class JwtInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * 后置处理：清除用户上下文，防止ThreadLocal内存泄漏
+     * 后置处理：清除用户上下文
      */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
@@ -82,9 +84,13 @@ public class JwtInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * 统一处理未授权响应
+     * 统一处理未授权响应（核心修复：添加跨域头）
      */
     private boolean handleUnauthorized(HttpServletResponse response, String message) throws Exception {
+        // 关键修复：添加跨域响应头，否则浏览器拦截错误信息
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json;charset=UTF-8");
 
