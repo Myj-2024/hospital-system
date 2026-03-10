@@ -2,7 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.hospital.mapper.sys.DoctorMapper">
 
-    <resultMap id="UserResultMap" type="com.hospital.entity.sys.User">
+    <!-- 医生DTO结果映射（联表sys_user + sys_doctor） -->
+    <resultMap id="DoctorResultMap" type="com.hospital.dto.user.DoctorDTO">
+        <!-- sys_user字段 -->
         <id column="id" property="id"/>
         <result column="username" property="username"/>
         <result column="password" property="password"/>
@@ -13,36 +15,152 @@
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
+        <!-- sys_doctor字段 -->
+        <result column="department_id" property="departmentId"/>
+        <result column="title" property="title"/>
+        <result column="skill" property="skill"/>
     </resultMap>
 
-    <!-- 分页查询 -->
-    <select id="pageQuery" resultMap="UserResultMap">
-        select * from sys_user
+    <!-- 分页查询医生（联表） -->
+    <select id="pageQuery" resultMap="DoctorResultMap">
+        select u.*, d.department_id, d.title, d.skill
+        from sys_user u
+        left join sys_doctor d on u.id = d.user_id
         <where>
+            <!-- 强制过滤医生角色 -->
+            u.role_id = 2
             <if test="username != null and username != ''">
-                and username like concat('%',#{username},'%')
+                and u.username like concat('%',#{username},'%')
             </if>
             <if test="phone != null and phone != ''">
-                and phone like concat('%',#{phone},'%')
+                and u.phone like concat('%',#{phone},'%')
             </if>
             <if test="identityCard != null and identityCard != ''">
-                and identity_card like concat('%',#{identityCard},'%')
+                and u.identity_card like concat('%',#{identityCard},'%')
             </if>
             <if test="realName != null and realName != ''">
-                and real_name like concat('%',#{realName},'%')
+                and u.real_name like concat('%',#{realName},'%')
+            </if>
+            <if test="status != null">
+                and u.status = #{status}
             </if>
         </where>
     </select>
 
-    <!-- 新增用户：核心修复 - role_id直接写死为2（医生角色），不再依赖参数 -->
-    <insert id="addUser" parameterType="com.hospital.dto.user.UserDTO">
+    <!-- 根据ID查询医生（联表） -->
+    <select id="getDoctorById" resultMap="DoctorResultMap">
+        select u.*, d.department_id, d.title, d.skill
+        from sys_user u
+                 left join sys_doctor d on u.id = d.user_id
+        where u.id = #{id}
+    </select>
+
+    <!-- 批量查询医生 -->
+    <select id="batchGetDoctorByIds" resultMap="DoctorResultMap">
+        select u.*, d.department_id, d.title, d.skill
+        from sys_user u
+        left join sys_doctor d on u.id = d.user_id
+        where u.id in
+        <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <!-- 插入sys_user表 -->
+    <insert id="addUser" parameterType="com.hospital.dto.user.DoctorDTO">
         insert into sys_user(
             username, password, phone, identity_card, real_name, role_id, status,
             create_time, update_time
         ) values (
-                     #{username}, #{password}, #{phone}, #{identityCard}, #{realName}, 2, #{status},
+                     #{username}, #{password}, #{phone}, #{identityCard}, #{realName}, #{roleId}, #{status},
                      NOW(), NOW()
                  )
     </insert>
 
+    <!-- 插入sys_doctor表 -->
+    <insert id="addDoctor" parameterType="com.hospital.entity.sys.SysDoctor">
+        insert into sys_doctor(
+            user_id, department_id, title, skill, create_time, update_time
+        ) values (
+                     #{userId}, #{departmentId}, #{title}, #{skill}, NOW(), NOW()
+                 )
+    </insert>
+
+    <!-- 更新sys_user表 -->
+    <update id="updateUser" parameterType="com.hospital.dto.user.DoctorDTO">
+        update sys_user
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="identityCard != null">identity_card = #{identityCard},</if>
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 更新sys_doctor表 -->
+    <update id="updateDoctor" parameterType="com.hospital.entity.sys.SysDoctor">
+        update sys_doctor
+        <set>
+            <if test="departmentId != null">department_id = #{departmentId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="skill != null">skill = #{skill},</if>
+            update_time = NOW()
+        </set>
+        where user_id = #{userId}
+    </update>
+
+    <!-- 批量删除sys_doctor表（物理删除：直接DELETE，无状态修改） -->
+    <delete id="batchDeleteDoctor">
+        delete from sys_doctor where user_id in
+        <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- 修改用户状态 -->
+    <update id="updateUserStatus" parameterType="com.hospital.dto.user.UserStatusDTO">
+        update sys_user
+        set status = #{status},
+            update_time = NOW()
+        where id = #{id} and role_id = 2
+    </update>
+
+    <!-- 批量修改用户状态 -->
+    <update id="batchUpdateUserStatus">
+        update sys_user
+        set status = #{status},
+        update_time = NOW()
+        where id in
+        <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and role_id = 2
+    </update>
+
+    <!-- 批量查询用户状态（保留） -->
+    <select id="batchGetUserStatusByIds" resultType="com.hospital.dto.user.UserStatusDTO">
+        select id, status from sys_user where id in
+        <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and role_id = 2
+    </select>
+
+    <!-- 查询单个用户状态（保留） -->
+    <select id="getUserStatusById" resultType="Integer">
+        select status from sys_user where id = #{id} and role_id = 2
+    </select>
+
+    <!-- 新增：批量物理删除sys_user表中的医生记录 -->
+    <delete id="batchDeleteUserByIds">
+        delete from sys_user
+        where id in
+        <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and role_id = 2 <!-- 仅删除医生角色，避免误删 -->
+    </delete>
 </mapper>

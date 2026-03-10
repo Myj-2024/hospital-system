@@ -35,4 +35,9 @@ public class UserPageQuery extends BaseEntity {
      * 角色Id
      */
     private Integer roleId;
+
+    /**
+     * 状态：0-禁用，1-正常
+     */
+    private Integer status;
 }

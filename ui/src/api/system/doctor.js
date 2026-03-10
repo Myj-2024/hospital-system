@@ -1,3 +1,4 @@
+// api/system/doctor.js
 import request from '@/utils/request'
 
 /**
@@ -33,20 +34,50 @@ export function addDoctor(data) {
  */
 export function editDoctor(data) {
     return request({
-        url: '/admin/system/doctor/edit',
+        url: '/admin/system/doctor/update',
         method: 'put',
         data
     })
 }
 
 /**
- * 删除/禁用医生账号
+ * 修改医生账号状态
+ * @param {Object} data - 包含id和status的对象
+ * @returns {Promise}
+ */
+export function updateDoctorStatus(data) {
+    return request({
+        url: '/admin/system/doctor/status', // 移除路径中的/:status
+        method: 'post',
+        data: {
+            id: data.id,
+            status: data.status // 只传这两个字段，和UserStatusDTO匹配
+        }
+    })
+}
+
+/**
+ * 删除医生账号（支持单个/批量）
+ * @param {Object} data - 包含id或idList的对象
+ * @returns {Promise}
+ */
+export function deleteDoctor(data) {
+    return request({
+        url: '/admin/system/doctor/delete',
+        method: 'delete',
+        data
+    })
+}
+
+/**
+ * 根据ID查询医生详情
  * @param {Number} id - 医生ID
  * @returns {Promise}
  */
-export function deleteDoctor(id) {
+export function getDoctorById(id) {
     return request({
         url: `/admin/system/doctor/${id}`,
-        method: 'delete'
+        method: 'get',
+        params: { id }
     })
 }

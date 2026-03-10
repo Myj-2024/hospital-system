@@ -4,6 +4,7 @@ import com.hospital.entity.base.BaseEntity;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class UserDTO extends BaseEntity implements Serializable {
@@ -44,4 +45,7 @@ public class UserDTO extends BaseEntity implements Serializable {
      * 状态：0-禁用，1-正常
      */
     private Integer status;
+
+    // 新增：用于接收批量删除的ID列表
+    private List<Long> idList;
 }
