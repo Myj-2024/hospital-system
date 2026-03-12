@@ -80,6 +80,8 @@
           </template>
           <el-menu-item index="/admin/system/doctor">医生账号</el-menu-item>
           <el-menu-item index="/admin/system/nurse">护士账号</el-menu-item>
+          <!-- 新增科室管理菜单 -->
+          <el-menu-item index="/admin/system/department">科室管理</el-menu-item>
           <el-menu-item index="/admin/system/role">权限配置</el-menu-item>
         </el-sub-menu>
       </el-menu>
@@ -103,7 +105,7 @@ const showCoreBusiness = computed(() => {
 </script>
 
 <style scoped>
-/* 样式不变，无需修改 */
+/* 样式不变 */
 .aside-container {
   background-color: #0d1b3e;
   display: flex;

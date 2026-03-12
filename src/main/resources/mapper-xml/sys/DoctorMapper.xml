@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.hospital.mapper.sys.DoctorMapper">
 
-    <!-- 医生DTO结果映射（联表sys_user + sys_doctor） -->
+    <!-- 医生DTO结果映射（联表sys_user + hospital_doctor） -->
     <resultMap id="DoctorResultMap" type="com.hospital.dto.user.DoctorDTO">
         <!-- sys_user字段 -->
         <id column="id" property="id"/>
@@ -15,17 +15,21 @@
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <!-- sys_doctor字段 -->
-        <result column="department_id" property="departmentId"/>
+        <!-- hospital_doctor字段 -->
+        <result column="dept_id" property="deptId"/>
         <result column="title" property="title"/>
-        <result column="skill" property="skill"/>
+        <result column="specialty" property="specialty"/>
+        <result column="work_time" property="workTime"/>
+        <result column="daily_max_num" property="dailyMaxNum"/>
+        <result column="dept_name" property="deptName"/>
     </resultMap>
 
     <!-- 分页查询医生（联表） -->
     <select id="pageQuery" resultMap="DoctorResultMap">
-        select u.*, d.department_id, d.title, d.skill
+        select u.*, d.dept_id, d.title, d.specialty, d.work_time, d.daily_max_num, dp.dept_name
         from sys_user u
-        left join sys_doctor d on u.id = d.user_id
+        left join hospital_doctor d on u.id = d.user_id
+        left join hospital_department dp on d.dept_id = dp.id
         <where>
             <!-- 强制过滤医生角色 -->
             u.role_id = 2
@@ -41,6 +45,18 @@
             <if test="realName != null and realName != ''">
                 and u.real_name like concat('%',#{realName},'%')
             </if>
+            <if test="deptName != null and deptName != ''">
+                and dp.dept_name like concat('%',#{deptName},'%')
+            </if>
+            <if test="deptId != null">
+                and d.dept_id = #{deptId}
+            </if>
+            <if test="workTime != null and workTime != ''">
+                and d.work_time = #{workTime}
+            </if>
+            <if test="dailyMaxNum != null">
+                and d.daily_max_num = #{dailyMaxNum}
+            </if>
             <if test="status != null">
                 and u.status = #{status}
             </if>
@@ -49,17 +65,19 @@
 
     <!-- 根据ID查询医生（联表） -->
     <select id="getDoctorById" resultMap="DoctorResultMap">
-        select u.*, d.department_id, d.title, d.skill
+        select u.*, d.dept_id, d.title, d.specialty, d.work_time, d.daily_max_num, dp.dept_name
         from sys_user u
-                 left join sys_doctor d on u.id = d.user_id
+                 left join hospital_doctor d on u.id = d.user_id
+                 left join hospital_department dp on d.dept_id = dp.id
         where u.id = #{id}
     </select>
 
     <!-- 批量查询医生 -->
     <select id="batchGetDoctorByIds" resultMap="DoctorResultMap">
-        select u.*, d.department_id, d.title, d.skill
+        select u.*, d.dept_id, d.title, d.specialty, d.work_time, d.daily_max_num, dp.dept_name
         from sys_user u
-        left join sys_doctor d on u.id = d.user_id
+        left join hospital_doctor d on u.id = d.user_id
+        left join hospital_department dp on d.dept_id = dp.id
         where u.id in
         <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
             #{item}
@@ -77,13 +95,25 @@
                  )
     </insert>
 
-    <!-- 插入sys_doctor表 -->
+    <!-- 插入hospital_doctor表（修复：新增id字段，利用自增特性） -->
     <insert id="addDoctor" parameterType="com.hospital.entity.sys.SysDoctor">
-        insert into sys_doctor(
-            user_id, department_id, title, skill, create_time, update_time
-        ) values (
-                     #{userId}, #{departmentId}, #{title}, #{skill}, NOW(), NOW()
-                 )
+        INSERT INTO hospital_doctor(
+            id, user_id, dept_id, title, specialty, work_time, daily_max_num, create_time, update_time
+        )
+        SELECT
+            NULL, -- 自增字段赋值NULL，数据库自动生成ID
+            #{userId},
+            hd.id,  -- 通过科室名称查询对应的科室ID
+            #{title},
+            #{specialty},
+            #{workTime},
+            #{dailyMaxNum},
+            NOW(),
+            NOW()
+        FROM hospital_system.hospital_department hd
+        WHERE hd.dept_name = #{deptName}  -- 前端传入的科室名称
+          AND hd.status = 1  -- 只关联启用状态的科室
+        LIMIT 1;  -- 确保只返回一条结果（科室名称唯一）
     </insert>
 
     <!-- 更新sys_user表 -->
@@ -100,21 +130,24 @@
         where id = #{id}
     </update>
 
-    <!-- 更新sys_doctor表 -->
+    <!-- 更新hospital_doctor表（通过科室名称关联更新科室ID） -->
     <update id="updateDoctor" parameterType="com.hospital.entity.sys.SysDoctor">
-        update sys_doctor
-        <set>
-            <if test="departmentId != null">department_id = #{departmentId},</if>
-            <if test="title != null">title = #{title},</if>
-            <if test="skill != null">skill = #{skill},</if>
-            update_time = NOW()
-        </set>
-        where user_id = #{userId}
+        UPDATE hospital_doctor hd
+        INNER JOIN hospital_system.hospital_department hdept
+        ON hdept.dept_name = #{deptName} AND hdept.status = 1  -- 关联启用状态的科室
+        SET
+        <if test="deptName != null">hd.dept_id = hdept.id,</if>  -- 通过科室名称获取dept_id
+        <if test="title != null">hd.title = #{title},</if>
+        <if test="specialty != null">hd.specialty = #{specialty},</if>
+        <if test="workTime != null">hd.work_time = #{workTime},</if>
+        <if test="dailyMaxNum != null">hd.daily_max_num = #{dailyMaxNum},</if>
+        hd.update_time = NOW()
+        WHERE hd.user_id = #{userId}
     </update>
 
-    <!-- 批量删除sys_doctor表（物理删除：直接DELETE，无状态修改） -->
+    <!-- 批量删除hospital_doctor表（物理删除：直接DELETE，无状态修改） -->
     <delete id="batchDeleteDoctor">
-        delete from sys_doctor where user_id in
+        delete from hospital_doctor where user_id in
         <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
             #{item}
         </foreach>

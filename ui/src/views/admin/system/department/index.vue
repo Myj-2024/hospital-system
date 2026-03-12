@@ -1,9 +1,9 @@
 <template>
-  <div class="nurse-manage-container">
+  <div class="department-manage-container">
     <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-left">
-        <h2 class="page-title">护士账号管理</h2>
+        <h2 class="page-title">科室管理</h2>
       </div>
       <div class="header-right">
         <el-button
@@ -13,7 +13,7 @@
             @click="openAddDialog"
             size="default"
         >
-          新增护士
+          新增科室
         </el-button>
         <!-- 批量删除按钮 -->
         <el-button
@@ -33,52 +33,25 @@
     <!-- 搜索卡片 -->
     <el-card class="search-card" shadow="hover">
       <el-form :inline="true" :model="searchForm" class="search-form" size="default">
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="科室名称" prop="deptName">
           <el-input
-              v-model="searchForm.username"
-              placeholder="请输入用户名"
+              v-model="searchForm.deptName"
+              placeholder="请输入科室名称"
               clearable
-              :prefix-icon="User"
+              :prefix-icon="OfficeBuilding"
               class="search-input"
           />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
+        <el-form-item label="科室描述" prop="deptDesc">
           <el-input
-              v-model="searchForm.phone"
-              placeholder="请输入手机号"
-              clearable
-              :prefix-icon="Phone"
-              class="search-input"
-          />
-        </el-form-item>
-        <el-form-item label="真实姓名" prop="realName">
-          <el-input
-              v-model="searchForm.realName"
-              placeholder="请输入真实姓名"
-              clearable
-              :prefix-icon="UserFilled"
-              class="search-input"
-          />
-        </el-form-item>
-        <el-form-item label="护士等级" prop="nurseLevel">
-          <el-input
-              v-model="searchForm.nurseLevel"
-              placeholder="请输入护士等级（如初级护士）"
-              clearable
-              class="search-input"
-          />
-        </el-form-item>
-        <el-form-item label="身份证号" prop="identityCard">
-          <el-input
-              v-model="searchForm.identityCard"
-              placeholder="请输入身份证号"
+              v-model="searchForm.deptDesc"
+              placeholder="请输入科室描述"
               clearable
               :prefix-icon="Document"
               class="search-input"
           />
         </el-form-item>
-        <!-- 状态筛选 -->
-        <el-form-item label="账号状态" prop="status">
+        <el-form-item label="科室状态" prop="status">
           <el-select
               v-model="searchForm.status"
               placeholder="全部状态"
@@ -90,7 +63,7 @@
           </el-select>
         </el-form-item>
         <el-form-item class="search-actions">
-          <el-button type="primary" @click="getNurseList" :icon="Search">
+          <el-button type="primary" @click="getDepartmentList" :icon="Search">
             查询
           </el-button>
           <el-button @click="resetSearch" :icon="Refresh">
@@ -106,14 +79,14 @@
         <div class="card-header">
           <span class="card-title">
             <el-icon><List/></el-icon>
-            护士账号列表
+            科室列表
           </span>
         </div>
       </template>
 
       <el-table
           v-loading="loading"
-          :data="nurseList"
+          :data="departmentList"
           border
           stripe
           style="width: 100%"
@@ -133,27 +106,19 @@
             <span class="id-cell">{{ scope.row.id }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="username" label="用户名" min-width="120">
+        <el-table-column prop="deptName" label="科室名称" min-width="150">
           <template #default="scope">
-            <div class="user-cell">
+            <div class="dept-cell">
               <el-icon :size="18" color="#4299e1">
-                <User/>
+                <OfficeBuilding/>
               </el-icon>
-              <span class="username-text">{{ scope.row.username }}</span>
+              <span class="deptname-text">{{ scope.row.deptName }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="realName" label="真实姓名" min-width="120" align="center"/>
-        <el-table-column prop="phone" label="手机号" min-width="130" align="center"/>
-        <el-table-column prop="nurseLevel" label="护士等级" min-width="120" align="center">
+        <el-table-column prop="deptDesc" label="科室描述" min-width="200" align="center">
           <template #default="scope">
-            <el-tag type="info" size="small">{{ scope.row.nurseLevel || '未设置' }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="wardId" label="病房ID" width="90" align="center"/>
-        <el-table-column prop="identityCard" label="身份证号" min-width="180" align="center">
-          <template #default="scope">
-            {{ formatIdCard(scope.row.identityCard) }}
+            <span class="desc-text">{{ scope.row.deptDesc || '未设置' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
@@ -198,7 +163,7 @@
               >
                 {{ scope.row.status === 1 ? '禁用' : '启用' }}
               </el-button>
-              <!-- 删除按钮 -->
+              <!-- 删除按钮：添加disabled限制 -->
               <el-button
                   type="danger"
                   size="small"
@@ -230,15 +195,15 @@
       </div>
     </el-card>
 
-    <!-- 新增护士弹窗 -->
+    <!-- 新增科室弹窗 -->
     <el-dialog
         v-model="addDialogVisible"
-        title="新增护士账号"
-        width="700px"
+        title="新增科室"
+        width="600px"
         destroy-on-close
         :close-on-click-modal="false"
         :modal-style="{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }"
-        class="nurse-dialog"
+        class="department-dialog"
     >
       <el-form
           ref="addFormRef"
@@ -250,75 +215,25 @@
           autocomplete="off"
           style="background-color: #ffffff;"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="科室名称" prop="deptName">
           <el-input
-              v-model="addForm.username"
-              placeholder="请输入用户名（登录账号）"
+              v-model="addForm.deptName"
+              placeholder="请输入科室名称"
               clearable
               class="form-input"
-              :name="`username_${randomKey}`"
+              :name="`deptName_${randomKey}`"
               autocomplete="off"
           />
         </el-form-item>
-        <el-form-item label="密码" prop="password">
+        <el-form-item label="科室描述" prop="deptDesc">
           <el-input
-              v-model="addForm.password"
-              type="password"
-              placeholder="请输入登录密码"
-              show-password
-              class="form-input"
-              :name="`password_${randomKey}`"
-              autocomplete="new-password"
-          />
-        </el-form-item>
-        <el-form-item label="真实姓名" prop="realName">
-          <el-input
-              v-model="addForm.realName"
-              placeholder="请输入护士真实姓名"
+              v-model="addForm.deptDesc"
+              placeholder="请输入科室描述（如：内科主要处理呼吸系统疾病等）"
               clearable
+              type="textarea"
+              :rows="3"
               class="form-input"
-              :name="`realName_${randomKey}`"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input
-              v-model="addForm.phone"
-              placeholder="请输入手机号"
-              clearable
-              class="form-input"
-              :name="`phone_${randomKey}`"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item label="身份证号" prop="identityCard">
-          <el-input
-              v-model="addForm.identityCard"
-              placeholder="请输入身份证号"
-              clearable
-              class="form-input"
-              :name="`idCard_${randomKey}`"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item label="病房ID" prop="wardId">
-          <el-input
-              v-model="addForm.wardId"
-              placeholder="请输入病房ID（数字）"
-              clearable
-              type="number"
-              class="form-input"
-              :name="`wardId_${randomKey}`"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item label="护士等级" prop="nurseLevel">
-          <el-input
-              v-model="addForm.nurseLevel"
-              placeholder="请输入护士等级（如初级护士）"
-              clearable
-              class="form-input"
-              :name="`nurseLevel_${randomKey}`"
+              :name="`deptDesc_${randomKey}`"
               autocomplete="off"
           />
         </el-form-item>
@@ -342,15 +257,15 @@
       </template>
     </el-dialog>
 
-    <!-- 编辑护士弹窗 -->
+    <!-- 编辑科室弹窗 -->
     <el-dialog
         v-model="editDialogVisible"
-        title="编辑护士账号"
-        width="700px"
+        title="编辑科室"
+        width="600px"
         destroy-on-close
         :close-on-click-modal="false"
         :modal-style="{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }"
-        class="nurse-dialog"
+        class="department-dialog"
     >
       <el-form
           ref="editFormRef"
@@ -365,57 +280,22 @@
         <el-form-item label="ID" prop="id">
           <el-input v-model="editForm.id" disabled class="form-input"/>
         </el-form-item>
-        <el-form-item label="用户名" prop="username">
+        <el-form-item label="科室名称" prop="deptName">
           <el-input
-              v-model="editForm.username"
-              placeholder="请输入用户名（登录账号）"
+              v-model="editForm.deptName"
+              placeholder="请输入科室名称"
               clearable
               class="form-input"
               autocomplete="off"
           />
         </el-form-item>
-        <el-form-item label="真实姓名" prop="realName">
+        <el-form-item label="科室描述" prop="deptDesc">
           <el-input
-              v-model="editForm.realName"
-              placeholder="请输入护士真实姓名"
+              v-model="editForm.deptDesc"
+              placeholder="请输入科室描述"
               clearable
-              class="form-input"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input
-              v-model="editForm.phone"
-              placeholder="请输入手机号"
-              clearable
-              class="form-input"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item label="身份证号" prop="identityCard">
-          <el-input
-              v-model="editForm.identityCard"
-              placeholder="请输入身份证号"
-              clearable
-              class="form-input"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item label="病房ID" prop="wardId">
-          <el-input
-              v-model="editForm.wardId"
-              placeholder="请输入病房ID（数字）"
-              clearable
-              type="number"
-              class="form-input"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item label="护士等级" prop="nurseLevel">
-          <el-input
-              v-model="editForm.nurseLevel"
-              placeholder="请输入护士等级（如初级护士）"
-              clearable
+              type="textarea"
+              :rows="3"
               class="form-input"
               autocomplete="off"
           />
@@ -446,9 +326,7 @@
 import {ref, onMounted} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {
-  User,
-  UserFilled,
-  Phone,
+  OfficeBuilding,
   Document,
   Plus,
   Search,
@@ -460,13 +338,13 @@ import {
   Delete
 } from '@element-plus/icons-vue'
 import {
-  getNursePage,
-  deleteNurse,
-  addNurse,
-  editNurse,
-  updateNurseStatus,
-  getNurseById
-} from '@/api/system/nurse'
+  getDepartmentPage,
+  deleteDepartment,
+  addDepartment,
+  editDepartment,
+  updateDepartmentStatus,
+  getDepartmentById
+} from '@/api/system/department'
 import dayjs from 'dayjs'
 
 // 生成随机key防止浏览器自动填充
@@ -474,8 +352,8 @@ const randomKey = ref(Math.random().toString(36).substring(2, 10))
 
 // 加载状态
 const loading = ref(false)
-// 护士列表数据
-const nurseList = ref([])
+// 科室列表数据
+const departmentList = ref([])
 // 总条数
 const total = ref(0)
 // 选中的行（批量操作）
@@ -484,59 +362,25 @@ const selectedRows = ref([])
 const searchForm = ref({
   pageNum: 1,
   pageSize: 10,
-  username: '',
-  phone: '',
-  identityCard: '',
-  realName: '',
-  nurseLevel: '', // 护士等级筛选
+  deptName: '',
+  deptDesc: '',
   status: ''
 })
 
-// 新增护士相关逻辑
+// 新增科室相关逻辑
 const addDialogVisible = ref(false)
 const addLoading = ref(false)
 const addFormRef = ref(null)
 const addForm = ref({
-  username: '',
-  password: '',
-  realName: '',
-  phone: '',
-  identityCard: '',
-  wardId: undefined, // 修复：初始值改为undefined（数字类型空值）
-  nurseLevel: '',
+  deptName: '',
+  deptDesc: '',
   status: '1'
 })
 
 // 新增表单校验规则
 const addRules = ref({
-  username: [{required: true, message: '请输入用户名', trigger: 'blur'}],
-  password: [{required: true, message: '请输入密码', trigger: 'blur'}],
-  realName: [{required: true, message: '请输入真实姓名', trigger: 'blur'}],
-  phone: [
-    {required: true, message: '请输入手机号', trigger: 'blur'},
-    {pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur'}
-  ],
-  identityCard: [
-    {required: true, message: '请输入身份证号', trigger: 'blur'},
-    {pattern: /^\d{17}[\dXx]$/, message: '请输入正确的身份证号格式', trigger: 'blur'}
-  ],
-  wardId: [
-    {required: true, message: '请输入病房ID', trigger: 'blur'},
-    {
-      validator: (rule, value, callback) => {
-        // 自定义校验：确保值为数字（或可转为数字）
-        if (value === undefined || value === null) {
-          callback(new Error('请输入病房ID'))
-        } else if (isNaN(Number(value))) {
-          callback(new Error('病房ID必须为数字'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
-  ],
-  nurseLevel: [{required: true, message: '请输入护士等级', trigger: 'blur'}],
+  deptName: [{required: true, message: '请输入科室名称', trigger: 'blur'}],
+  deptDesc: [{required: true, message: '请输入科室描述', trigger: 'blur'}],
   status: [{required: true, message: '请选择状态', trigger: 'change'}]
 })
 
@@ -546,44 +390,16 @@ const editLoading = ref(false)
 const editFormRef = ref(null)
 const editForm = ref({
   id: '',
-  username: '',
-  realName: '',
-  phone: '',
-  identityCard: '',
-  wardId: undefined, // 修复：初始值改为undefined
-  nurseLevel: '',
+  deptName: '',
+  deptDesc: '',
   status: '1'
 })
 
 // 编辑表单校验规则
 const editRules = ref({
-  id: [{required: true, message: '护士ID不能为空', trigger: 'blur'}],
-  username: [{required: true, message: '请输入用户名', trigger: 'blur'}],
-  realName: [{required: true, message: '请输入真实姓名', trigger: 'blur'}],
-  phone: [
-    {required: true, message: '请输入手机号', trigger: 'blur'},
-    {pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur'}
-  ],
-  identityCard: [
-    {required: true, message: '请输入身份证号', trigger: 'blur'},
-    {pattern: /^\d{17}[\dXx]$/, message: '请输入正确的身份证号格式', trigger: 'blur'}
-  ],
-  wardId: [
-    {required: true, message: '请输入病房ID', trigger: 'blur'},
-    {
-      validator: (rule, value, callback) => {
-        if (value === undefined || value === null) {
-          callback(new Error('请输入病房ID'))
-        } else if (isNaN(Number(value))) {
-          callback(new Error('病房ID必须为数字'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
-  ],
-  nurseLevel: [{required: true, message: '请输入护士等级', trigger: 'blur'}],
+  id: [{required: true, message: '科室ID不能为空', trigger: 'blur'}],
+  deptName: [{required: true, message: '请输入科室名称', trigger: 'blur'}],
+  deptDesc: [{required: true, message: '请输入科室描述', trigger: 'blur'}],
   status: [{required: true, message: '请选择状态', trigger: 'change'}]
 })
 
@@ -594,16 +410,12 @@ const openAddDialog = () => {
 
   // 清空表单
   addForm.value = {
-    username: '',
-    password: '',
-    realName: '',
-    phone: '',
-    identityCard: '',
-    wardId: undefined, // 修复：重置为undefined
-    nurseLevel: '',
+    deptName: '',
+    deptDesc: '',
     status: '1'
   }
 
+  // 延迟打开弹窗
   setTimeout(() => {
     addDialogVisible.value = true
   }, 0)
@@ -612,23 +424,19 @@ const openAddDialog = () => {
 // 打开编辑弹窗
 const openEditDialog = async (row) => {
   try {
-    // 从后端获取完整的护士信息
-    const detailRes = await getNurseById(row.id)
-    const nurseData = detailRes.data || row
+    // 获取科室详情
+    const detailRes = await getDepartmentById(row.id)
+    const deptData = detailRes.data || row
 
     editForm.value = {
-      id: nurseData.id,
-      username: nurseData.username,
-      realName: nurseData.realName,
-      phone: nurseData.phone,
-      identityCard: nurseData.identityCard,
-      wardId: nurseData.wardId ? Number(nurseData.wardId) : undefined, // 修复：转为数字或undefined
-      nurseLevel: nurseData.nurseLevel || '',
-      status: nurseData.status.toString()
+      id: deptData.id,
+      deptName: deptData.deptName || '',
+      deptDesc: deptData.deptDesc || '',
+      status: deptData.status.toString()
     }
     editDialogVisible.value = true
   } catch (error) {
-    ElMessage.error('获取护士信息失败：' + error.message)
+    ElMessage.error('获取科室信息失败：' + error.message)
   }
 }
 
@@ -640,20 +448,18 @@ const submitAddForm = async () => {
     if (valid) {
       const submitData = {
         ...addForm.value,
-        status: Number(addForm.value.status),
-        wardId: addForm.value.wardId ? Number(addForm.value.wardId) : null,
-        roleId: 3 // 强制设置为护士角色（后端也会强制设置）
+        status: Number(addForm.value.status)
       }
 
       addLoading.value = true
       try {
-        await addNurse(submitData)
-        ElMessage.success('护士账号新增成功！')
+        await addDepartment(submitData)
+        ElMessage.success('科室新增成功！')
         addDialogVisible.value = false
-        getNurseList()
+        getDepartmentList()
       } catch (error) {
         ElMessage.error(error.message || '新增失败，请重试')
-        console.error('新增护士失败详情：', error)
+        console.error('新增科室失败详情：', error)
       } finally {
         addLoading.value = false
       }
@@ -670,20 +476,18 @@ const submitEditForm = async () => {
       const submitData = {
         ...editForm.value,
         id: Number(editForm.value.id),
-        status: Number(editForm.value.status),
-        wardId: editForm.value.wardId ? Number(editForm.value.wardId) : null,
-        roleId: 3 // 强制设置为护士角色
+        status: Number(editForm.value.status)
       }
 
       editLoading.value = true
       try {
-        await editNurse(submitData)
-        ElMessage.success('护士账号修改成功！')
+        await editDepartment(submitData)
+        ElMessage.success('科室修改成功！')
         editDialogVisible.value = false
-        getNurseList()
+        getDepartmentList()
       } catch (error) {
         ElMessage.error(error.message || '修改失败，请重试')
-        console.error('修改护士失败详情：', error)
+        console.error('修改科室失败详情：', error)
       } finally {
         editLoading.value = false
       }
@@ -691,26 +495,23 @@ const submitEditForm = async () => {
   })
 }
 
-// 获取护士列表
-const getNurseList = async () => {
+// 获取科室列表
+const getDepartmentList = async () => {
   try {
     loading.value = true
     // 处理筛选参数
     const params = {
       ...searchForm.value,
-      ...(searchForm.value.status ? {status: Number(searchForm.value.status)} : {}),
-      ...(searchForm.value.nurseLevel ? {nurseLevel: searchForm.value.nurseLevel} : {})
+      ...(searchForm.value.status ? {status: Number(searchForm.value.status)} : {})
     }
-    // 强制设置角色ID为3（护士）
-    params.roleId = 3
-    const res = await getNursePage(params)
-    nurseList.value = res.data.records || []
+    const res = await getDepartmentPage(params)
+    departmentList.value = res.data.records || []
     total.value = res.data.total || 0
   } catch (error) {
-    nurseList.value = []
+    departmentList.value = []
     total.value = 0
-    ElMessage.error('获取护士列表失败：' + error.message)
-    console.error('查询护士列表失败：', error)
+    ElMessage.error('获取科室列表失败：' + error.message)
+    console.error('查询科室列表失败：', error)
   } finally {
     loading.value = false
   }
@@ -721,30 +522,21 @@ const resetSearch = () => {
   searchForm.value = {
     pageNum: 1,
     pageSize: 10,
-    username: '',
-    phone: '',
-    identityCard: '',
-    realName: '',
-    nurseLevel: '',
+    deptName: '',
+    deptDesc: '',
     status: ''
   }
-  getNurseList()
+  getDepartmentList()
 }
 
 // 分页相关方法
 const handleSizeChange = (val) => {
   searchForm.value.pageSize = val
-  getNurseList()
+  getDepartmentList()
 }
 const handleCurrentChange = (val) => {
   searchForm.value.pageNum = val
-  getNurseList()
-}
-
-// 身份证号脱敏
-const formatIdCard = (idCard) => {
-  if (!idCard) return ''
-  return idCard.replace(/(\d{6})\d{8}(\d{4})/, '$1********$2')
+  getDepartmentList()
 }
 
 // 处理表格多选
@@ -759,8 +551,8 @@ const handleUpdateStatus = async (row) => {
 
   try {
     await ElMessageBox.confirm(
-        `⚠️ 确认要${statusText}该护士账号吗？
-      ✅ 账号所有数据将完整保留，仅状态变更
+        `⚠️ 确认要${statusText}该科室吗？
+      ✅ 科室所有数据将完整保留，仅状态变更
       ❌ 不会删除任何数据`,
         '状态修改确认（数据安全）',
         {
@@ -776,120 +568,92 @@ const handleUpdateStatus = async (row) => {
       status: newStatus
     }
 
-    await updateNurseStatus(statusData)
-    ElMessage.success(`护士账号${statusText}成功！`)
-    getNurseList()
+    await updateDepartmentStatus(statusData)
+    ElMessage.success(`科室${statusText}成功！数据已完整保留`)
+    getDepartmentList()
   } catch (error) {
-    // 仅在不是用户取消操作时才提示错误
-    if (error !== 'cancel' && !(error instanceof Error && error.message === 'cancel')) {
-      ElMessage.error(`状态修改失败：${error.message || '服务器异常，请稍后重试'}`)
-      console.error('状态修改失败详情：', error)
+    if (error !== 'cancel') {
+      ElMessage.error(`状态修改失败：${error.message || '请检查接口是否只修改状态'}`)
     }
   }
 }
 
-// 单个删除
+// 单个删除（添加状态校验）
 const handleSingleDelete = async (row) => {
+  // 校验状态：启用状态禁止删除
   if (row.status === 1) {
-    ElMessage.warning('只能删除禁用状态的护士账号，无法删除启用状态的账号')
+    ElMessage.warning('只能删除禁用状态的科室账号，无法删除启用状态的账号')
     return
   }
 
   try {
     await ElMessageBox.confirm(
-        `【⚠️ 数据说明】确定要删除该护士账号吗？
-        1. 删除后将移除该用户的护士专属信息（等级/病房等）
-        2. 用户基础账号信息将保留并标记为禁用
-        3. 操作不可恢复，请谨慎！`,
-        '删除确认',
+        `【⚠️ 高危操作】确定要彻底删除该科室吗？
+        1. 删除后将彻底清除该科室的所有数据
+        2. 操作不可逆，数据无法恢复，请务必谨慎！`,
+        '彻底删除确认',
         {
           confirmButtonText: '确认删除',
           cancelButtonText: '取消',
           type: 'danger'
         }
     )
-
-    // 调用删除接口并校验响应
-    const deleteRes = await deleteNurse({id: row.id, idList: [row.id]})
-    // 兼容不同的接口返回格式（code=200/0 或直接返回成功）
-    const isSuccess = !deleteRes.code || deleteRes.code === 200 || deleteRes.code === 0 || deleteRes.success
-
-    if (isSuccess) {
-      ElMessage.success('护士账号删除成功！')
-      getNurseList()
-    } else {
-      ElMessage.error(deleteRes.message || '删除失败，请稍后重试')
-    }
+    await deleteDepartment({id: row.id, idList: [row.id]})
+    ElMessage.success('科室已彻底删除！所有相关数据已清除')
+    getDepartmentList()
   } catch (error) {
-    // 区分用户取消和真正的错误
-    if (error === 'cancel' || (error instanceof Error && error.message === 'cancel')) {
-      return // 用户取消操作，不提示任何信息
+    if (error !== 'cancel') {
+      ElMessage.error(error.message || '删除失败：该科室不存在或已被删除')
     }
-    // 数据库已删除但接口抛错的情况：仍提示成功，避免误导用户
-    ElMessage.success('护士账号删除成功！')
-    getNurseList()
-    console.error('删除接口异常（数据已删除）：', error)
   }
 }
 
-// 批量删除
+// 批量删除（添加状态校验）
 const handleBatchDelete = async () => {
   if (selectedRows.value.length === 0) {
-    ElMessage.warning('请选择要删除的护士账号')
+    ElMessage.warning('请选择要删除的科室')
     return
   }
 
+  // 校验选中项状态：过滤出启用状态的科室
   const enableRows = selectedRows.value.filter(item => item.status === 1)
   if (enableRows.length > 0) {
-    ElMessage.warning(`选中${selectedRows.value.length}个账号，其中${enableRows.length}个为启用状态，仅可删除禁用账号`)
+    ElMessage.warning(`选中${selectedRows.value.length}个科室，其中${enableRows.length}个为启用状态，仅可删除禁用科室`)
     return
   }
 
   try {
     await ElMessageBox.confirm(
-        `【⚠️ 数据说明】确定要删除选中的${selectedRows.value.length}个护士账号吗？
-        1. 删除后将移除这些用户的护士专属信息（等级/病房等）
-        2. 操作不可恢复，请谨慎！`,
-        '批量删除确认',
+        `【⚠️ 高危操作】确定要彻底删除选中的${selectedRows.value.length}个科室吗？
+        1. 删除后将彻底清除这些科室的所有数据
+        2. 操作不可逆，数据无法恢复，请务必谨慎！`,
+        '批量彻底删除确认',
         {
           confirmButtonText: '确认删除',
           cancelButtonText: '取消',
           type: 'danger'
         }
     )
-
     const idList = selectedRows.value.map(item => item.id)
-    // 调用批量删除接口并校验响应
-    const deleteRes = await deleteNurse({idList})
-    const isSuccess = !deleteRes.code || deleteRes.code === 200 || deleteRes.code === 0 || deleteRes.success
-
-    if (isSuccess) {
-      ElMessage.success(`成功删除${selectedRows.value.length}个护士账号！`)
-      getNurseList()
-    } else {
-      ElMessage.error(deleteRes.message || '批量删除失败，请稍后重试')
-    }
+    await deleteDepartment({idList})
+    ElMessage.success(`成功彻底删除${selectedRows.value.length}个科室！所有相关数据已清除`)
+    getDepartmentList()
   } catch (error) {
-    // 区分用户取消和真正的错误
-    if (error === 'cancel' || (error instanceof Error && error.message === 'cancel')) {
-      return // 用户取消操作，不提示任何信息
+    if (error !== 'cancel') {
+      ElMessage.error(error.message || '批量删除失败：部分科室可能不存在或已被删除')
     }
-    // 数据库已删除但接口抛错的情况：仍提示成功
-    ElMessage.success(`成功删除${selectedRows.value.length}个护士账号！`)
-    getNurseList()
-    console.error('批量删除接口异常（数据已删除）：', error)
   }
 }
 
 // 页面初始化加载列表
 onMounted(() => {
-  getNurseList()
+  getDepartmentList()
 })
 </script>
 
 <style scoped>
 /* 全局容器 */
-.nurse-manage-container {
+.department-manage-container {
   background-color: #f8f9fa;
   min-height: calc(100vh - 64px);
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
@@ -917,12 +681,6 @@ onMounted(() => {
   color: #2d3748;
   margin: 0;
   letter-spacing: 0.5px;
-}
-
-.page-desc {
-  font-size: 13px;
-  color: #718096;
-  line-height: 1.4;
 }
 
 .add-btn, .batch-delete-btn {
@@ -954,7 +712,6 @@ onMounted(() => {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
-
 /* 搜索表单 */
 .search-form {
   display: flex;
@@ -982,13 +739,13 @@ onMounted(() => {
   --el-table-text-color: #4a5568;
 }
 
-.user-cell {
+.dept-cell {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.username-text {
+.deptname-text {
   font-weight: 500;
   color: #2d3748;
 }
@@ -997,6 +754,15 @@ onMounted(() => {
   font-family: 'Consolas', 'Monaco', monospace;
   color: #4299e1;
   font-weight: 600;
+}
+
+.desc-text {
+  color: #4a5568;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .table-actions {
@@ -1060,7 +826,7 @@ onMounted(() => {
 }
 
 /* 弹窗样式 */
-.nurse-dialog {
+.department-dialog {
   --el-dialog-border-radius: 12px;
   --el-dialog-content-padding: 0;
   --el-dialog-bg-color: #ffffff;
@@ -1087,6 +853,10 @@ onMounted(() => {
 @media (max-width: 1400px) {
   .search-form {
     gap: 12px 16px;
+  }
+
+  .desc-text {
+    -webkit-line-clamp: 1;
   }
 }
 

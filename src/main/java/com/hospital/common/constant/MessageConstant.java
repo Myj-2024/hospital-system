@@ -16,4 +16,8 @@ public class MessageConstant {
     public static final String NURSE_UPDATE_ERROR = "编辑护士失败";
     public static final String USER_UPDATE_ERROR = "修改医生状态失败";
     public static final String NURSE_DELETE_STAUS_ERROR = "只能删除禁用状态的护士，无法删除启用状态的护士";
+    public static final String DEPARTMENT_INSERT_ERROR = "科室添加失败";
+    public static final String DEPARTMENT_UPDATE_ERROR = "修改科室失败";
+    public static final String DEPARTMENT_DELETE_ERROR = "科室删除失败";
+    public static final String DEPARTMENT_STATUS_UPDATE_ERROR = "科室状态修改失败";
 }

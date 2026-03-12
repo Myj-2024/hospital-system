@@ -99,6 +99,10 @@ public class DoctorServiceImpl implements DoctorService {
         boolean doctorResult = doctorMapper.updateDoctor(sysDoctor);
         return userResult && doctorResult;
     }
+
+    /**
+     * 批量删除医生
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteDoctor(DoctorDTO doctorDTO) {

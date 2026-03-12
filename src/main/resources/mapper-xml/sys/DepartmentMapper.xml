@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hospital.mapper.sys.DepartmentMapper">
+
+    <!-- 医生DTO结果映射（联表sys_user + hospital_doctor） -->
+    <resultMap id="DepartmentResultMap" type="com.hospital.dto.user.DepartmentDTO">
+        <result column="dept_name" property="deptName"/>
+        <result column="dept_desc" property="deptDesc"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <!-- 分页查询科室列表 -->
+    <select id="pageQuery" resultMap="DepartmentResultMap">
+        select * from hospital_department
+        <where>
+            <if test="deptName != null and deptName != ''">
+                and dept_name like concat('%',#{deptName},'%')
+            </if>
+            <if test="deptDesc != null and deptDesc != ''">
+                and dept_desc like concat('%',#{deptDesc},'%')
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <!-- 添加科室 -->
+    <insert id="addDepartment">
+        insert into hospital_department(dept_name, dept_desc, status)
+        values (#{deptName}, #{deptDesc}, #{status})
+    </insert>
+
+    <!-- 修改科室 -->
+    <update id="updateDepartment">
+        update hospital_department
+        <set>
+            <if test="deptName != null">
+                dept_name = #{deptName},
+            </if>
+            <if test="deptDesc != null">
+                dept_desc = #{deptDesc},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 批量删除科室 -->
+    <delete id="batchDeleteDepartment">
+        delete from hospital_department where id in
+        <foreach item="id" collection="list" separator="," close=")" open="(" index="">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 根据ID查询科室 -->
+    <select id="getDepartmentById" resultType="com.hospital.dto.user.DepartmentDTO">
+        select * from hospital_department where id = #{id}
+    </select>
+
+
+
+</mapper>

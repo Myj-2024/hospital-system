@@ -4,7 +4,6 @@
     <div class="page-header">
       <div class="header-left">
         <h2 class="page-title">医生账号管理</h2>
-        <span class="page-desc">管理系统内所有医生账号信息，支持查询、新增、编辑与状态控制</span>
       </div>
       <div class="header-right">
         <el-button
@@ -33,14 +32,6 @@
 
     <!-- 搜索卡片 -->
     <el-card class="search-card" shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <span class="card-title">
-            <el-icon><Search/></el-icon>
-            筛选条件
-          </span>
-        </div>
-      </template>
       <el-form :inline="true" :model="searchForm" class="search-form" size="default">
         <el-form-item label="用户名" prop="username">
           <el-input
@@ -85,6 +76,26 @@
               :prefix-icon="Document"
               class="search-input"
           />
+        </el-form-item>
+        <!-- 新增科室名称筛选 -->
+        <el-form-item label="科室名称" prop="deptName">
+          <el-select
+              v-model="searchForm.deptName"
+              placeholder="请选择科室"
+              clearable
+              class="search-input"
+              filterable
+              remote
+              :remote-method="getDeptList"
+              :loading="deptLoading"
+          >
+            <el-option
+                v-for="dept in deptList"
+                :key="dept.id"
+                :label="dept.deptName"
+                :value="dept.deptName"
+            />
+          </el-select>
         </el-form-item>
         <!-- 新增状态筛选 -->
         <el-form-item label="账号状态" prop="status">
@@ -159,10 +170,16 @@
             <el-tag type="info" size="small">{{ scope.row.title || '未设置' }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="departmentId" label="科室ID" width="90" align="center"/>
-        <el-table-column prop="skill" label="擅长领域" min-width="200" align="center">
+        <!-- 核心修改：替换科室ID列为科室名称列 -->
+        <el-table-column prop="deptName" label="科室名称" min-width="120" align="center">
           <template #default="scope">
-            <span class="skill-text">{{ scope.row.skill || '未设置' }}</span>
+            <el-tag type="primary" size="small">{{ scope.row.deptName || '未分配' }}</el-tag>
+          </template>
+        </el-table-column>
+        <!-- 核心修改：skill → specialty 字段对齐 -->
+        <el-table-column prop="specialty" label="擅长领域" min-width="200" align="center">
+          <template #default="scope">
+            <span class="skill-text">{{ scope.row.specialty || '未设置' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="identityCard" label="身份证号" min-width="180" align="center">
@@ -212,7 +229,7 @@
               >
                 {{ scope.row.status === 1 ? '禁用' : '启用' }}
               </el-button>
-              <!-- 删除按钮：移除disabled限制 -->
+              <!-- 删除按钮：添加disabled限制 -->
               <el-button
                   type="danger"
                   size="small"
@@ -220,6 +237,7 @@
                   text
                   @click="handleSingleDelete(scope.row)"
                   class="action-btn delete-btn"
+                  :disabled="scope.row.status === 1"
               >
                 删除
               </el-button>
@@ -322,18 +340,24 @@
               autocomplete="off"
           />
         </el-form-item>
-        <!-- 修复：添加值转换 + 自定义校验规则 -->
-        <el-form-item label="科室ID" prop="departmentId">
-          <el-input
-              v-model.number="addForm.departmentId"
-              placeholder="请输入科室ID（数字）"
+        <!-- 核心修改：科室ID输入框 → 科室名称下拉选择框 -->
+        <el-form-item label="科室名称" prop="deptName">
+          <el-select
+              v-model="addForm.deptName"
+              placeholder="请选择科室"
               clearable
-              type="number"
-              min="1"
               class="form-input"
-              :name="`deptId_${randomKey}`"
-              autocomplete="off"
-          />
+              :name="`deptName_${randomKey}`"
+              filterable
+              :loading="deptLoading"
+          >
+            <el-option
+                v-for="dept in deptList"
+                :key="dept.id"
+                :label="dept.deptName"
+                :value="dept.deptName"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="职称" prop="title">
           <el-input
@@ -345,15 +369,16 @@
               autocomplete="off"
           />
         </el-form-item>
-        <el-form-item label="擅长领域" prop="skill">
+        <!-- 核心修改：skill → specialty 字段对齐 -->
+        <el-form-item label="擅长领域" prop="specialty">
           <el-input
-              v-model="addForm.skill"
+              v-model="addForm.specialty"
               placeholder="请输入擅长领域（多个用逗号分隔）"
               clearable
               type="textarea"
               :rows="3"
               class="form-input"
-              :name="`skill_${randomKey}`"
+              :name="`specialty_${randomKey}`"
               autocomplete="off"
           />
         </el-form-item>
@@ -436,17 +461,23 @@
               autocomplete="off"
           />
         </el-form-item>
-        <!-- 修复：编辑弹窗同样添加.number修饰符 -->
-        <el-form-item label="科室ID" prop="departmentId">
-          <el-input
-              v-model.number="editForm.departmentId"
-              placeholder="请输入科室ID（数字）"
+        <!-- 核心修改：科室ID输入框 → 科室名称下拉选择框 -->
+        <el-form-item label="科室名称" prop="deptName">
+          <el-select
+              v-model="editForm.deptName"
+              placeholder="请选择科室"
               clearable
-              type="number"
-              min="1"
               class="form-input"
-              autocomplete="off"
-          />
+              filterable
+              :loading="deptLoading"
+          >
+            <el-option
+                v-for="dept in deptList"
+                :key="dept.id"
+                :label="dept.deptName"
+                :value="dept.deptName"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="职称" prop="title">
           <el-input
@@ -457,9 +488,10 @@
               autocomplete="off"
           />
         </el-form-item>
-        <el-form-item label="擅长领域" prop="skill">
+        <!-- 核心修改：skill → specialty 字段对齐 -->
+        <el-form-item label="擅长领域" prop="specialty">
           <el-input
-              v-model="editForm.skill"
+              v-model="editForm.specialty"
               placeholder="请输入擅长领域（多个用逗号分隔）"
               clearable
               type="textarea"
@@ -515,6 +547,8 @@ import {
   updateDoctorStatus,
   getDoctorById
 } from '@/api/system/doctor'
+// 核心修改：导入科室分页接口（替代原有的getDeptList）
+import {getDepartmentPage} from '@/api/system/department'
 import dayjs from 'dayjs'
 
 // 关键修复：生成随机key防止浏览器自动填充
@@ -522,13 +556,17 @@ const randomKey = ref(Math.random().toString(36).substring(2, 10))
 
 // 加载状态
 const loading = ref(false)
+// 科室列表加载状态
+const deptLoading = ref(false)
 // 医生列表数据
 const doctorList = ref([])
+// 科室列表数据（下拉选择用）
+const deptList = ref([])
 // 总条数
 const total = ref(0)
 // 选中的行（批量操作）
 const selectedRows = ref([])
-// 搜索表单（新增职称筛选）
+// 搜索表单（新增科室名称筛选）
 const searchForm = ref({
   pageNum: 1,
   pageSize: 10,
@@ -536,7 +574,8 @@ const searchForm = ref({
   phone: '',
   identityCard: '',
   realName: '',
-  title: '', // 新增职称筛选
+  title: '',
+  deptName: '', // 新增科室名称筛选
   status: ''
 })
 
@@ -550,13 +589,13 @@ const addForm = ref({
   realName: '',
   phone: '',
   identityCard: '',
-  departmentId: undefined, // 修复：初始值设为undefined而非空字符串
+  deptName: '', // 核心修改：替换departmentId为deptName
   title: '',
-  skill: '',
+  specialty: '', // 核心修改：替换skill为specialty
   status: '1'
 })
 
-// 新增表单校验规则 - 修复科室ID校验
+// 新增表单校验规则 - 核心修改：替换departmentId为deptName
 const addRules = ref({
   username: [{required: true, message: '请输入用户名', trigger: 'blur'}],
   password: [{required: true, message: '请输入密码', trigger: 'blur'}],
@@ -569,21 +608,13 @@ const addRules = ref({
     {required: true, message: '请输入身份证号', trigger: 'blur'},
     {pattern: /^\d{17}[\dXx]$/, message: '请输入正确的身份证号格式', trigger: 'blur'}
   ],
-  departmentId: [
-    {required: true, message: '请输入科室ID', trigger: 'blur'},
-    {type: 'number', min: 1, message: '科室ID必须为大于0的数字', trigger: 'blur'}, // 增强校验
-    {validator: (rule, value, callback) => { // 自定义校验确保是数字类型
-        if (value === undefined || value === null || value === '') {
-          callback(new Error('请输入科室ID'))
-        } else if (typeof value !== 'number' || isNaN(value)) {
-          callback(new Error('科室ID必须为数字'))
-        } else {
-          callback()
-        }
-      }, trigger: 'blur'}
+  deptName: [ // 替换departmentId校验
+    {required: true, message: '请选择科室名称', trigger: 'change'}
   ],
   title: [{required: true, message: '请输入职称', trigger: 'blur'}],
-  skill: [{required: true, message: '请输入擅长领域', trigger: 'blur'}],
+  specialty: [ // 替换skill校验
+    {required: true, message: '请输入擅长领域', trigger: 'blur'}
+  ],
   status: [{required: true, message: '请选择状态', trigger: 'change'}]
 })
 
@@ -597,13 +628,13 @@ const editForm = ref({
   realName: '',
   phone: '',
   identityCard: '',
-  departmentId: undefined, // 修复：初始值设为undefined
+  deptName: '', // 核心修改：替换departmentId为deptName
   title: '',
-  skill: '',
+  specialty: '', // 核心修改：替换skill为specialty
   status: '1'
 })
 
-// 编辑表单校验规则 - 同步修复科室ID校验
+// 编辑表单校验规则 - 核心修改：替换departmentId为deptName
 const editRules = ref({
   id: [{required: true, message: '医生ID不能为空', trigger: 'blur'}],
   username: [{required: true, message: '请输入用户名', trigger: 'blur'}],
@@ -616,23 +647,35 @@ const editRules = ref({
     {required: true, message: '请输入身份证号', trigger: 'blur'},
     {pattern: /^\d{17}[\dXx]$/, message: '请输入正确的身份证号格式', trigger: 'blur'}
   ],
-  departmentId: [
-    {required: true, message: '请输入科室ID', trigger: 'blur'},
-    {type: 'number', min: 1, message: '科室ID必须为大于0的数字', trigger: 'blur'},
-    {validator: (rule, value, callback) => {
-        if (value === undefined || value === null || value === '') {
-          callback(new Error('请输入科室ID'))
-        } else if (typeof value !== 'number' || isNaN(value)) {
-          callback(new Error('科室ID必须为数字'))
-        } else {
-          callback()
-        }
-      }, trigger: 'blur'}
+  deptName: [ // 替换departmentId校验
+    {required: true, message: '请选择科室名称', trigger: 'change'}
   ],
   title: [{required: true, message: '请输入职称', trigger: 'blur'}],
-  skill: [{required: true, message: '请输入擅长领域', trigger: 'blur'}],
+  specialty: [ // 替换skill校验
+    {required: true, message: '请输入擅长领域', trigger: 'blur'}
+  ],
   status: [{required: true, message: '请选择状态', trigger: 'change'}]
 })
+
+// 核心修改：获取科室列表（调用分页接口，支持关键词搜索，实时同步科室管理数据）
+const getDeptList = async (keyword = '') => {
+  try {
+    deptLoading.value = true
+    // 调用科室分页接口，获取所有启用状态的科室（不分页）
+    const res = await getDepartmentPage({
+      pageNum: 1,
+      pageSize: 1000, // 一次性获取足够多的科室数据
+      deptName: keyword,
+      status: 1 // 只查询启用状态的科室
+    })
+    deptList.value = res.data.records || []
+  } catch (error) {
+    deptList.value = []
+    ElMessage.error('获取科室列表失败：' + error.message)
+  } finally {
+    deptLoading.value = false
+  }
+}
 
 // 打开新增弹窗 - 关键修复：每次打开重新生成随机key + 强制清空表单
 const openAddDialog = () => {
@@ -646,11 +689,14 @@ const openAddDialog = () => {
     realName: '',
     phone: '',
     identityCard: '',
-    departmentId: undefined, // 修复：设为undefined
+    deptName: '', // 核心修改：替换departmentId
     title: '',
-    skill: '',
+    specialty: '', // 核心修改：替换skill
     status: '1'
   }
+
+  // 预加载科室列表
+  getDeptList()
 
   // 延迟打开弹窗（确保DOM更新完成）
   setTimeout(() => {
@@ -661,6 +707,9 @@ const openAddDialog = () => {
 // 打开编辑弹窗
 const openEditDialog = async (row) => {
   try {
+    // 预加载科室列表
+    getDeptList()
+
     // 从后端获取完整的医生信息（联表数据）
     const detailRes = await getDoctorById(row.id)
     const doctorData = detailRes.data || row
@@ -671,9 +720,9 @@ const openEditDialog = async (row) => {
       realName: doctorData.realName,
       phone: doctorData.phone,
       identityCard: doctorData.identityCard,
-      departmentId: doctorData.departmentId ? Number(doctorData.departmentId) : undefined, // 修复：转数字+处理空值
+      deptName: doctorData.deptName || '', // 核心修改：赋值科室名称
       title: doctorData.title || '',
-      skill: doctorData.skill || '',
+      specialty: doctorData.specialty || '', // 核心修改：替换skill
       status: doctorData.status.toString()
     }
     editDialogVisible.value = true
@@ -691,8 +740,11 @@ const submitAddForm = async () => {
       const submitData = {
         ...addForm.value,
         status: Number(addForm.value.status),
-        departmentId: addForm.value.departmentId, // 已通过.number转为数字，无需再转
-        roleId: 2 // 强制设置为医生角色
+        roleId: 2, // 强制设置为医生角色
+        // 核心修改：传递deptName而非deptId，后端通过名称关联查询ID
+        userId: null, // 由后端生成用户ID后关联（根据实际接口调整）
+        dailyMaxNum: 20, // 默认每日最大接诊数（可根据需求改为可配置）
+        workTime: '' // 出诊时间，可后续扩展
       }
 
       addLoading.value = true
@@ -721,8 +773,10 @@ const submitEditForm = async () => {
         ...editForm.value,
         id: Number(editForm.value.id),
         status: Number(editForm.value.status),
-        departmentId: editForm.value.departmentId, // 已转为数字
-        roleId: 2 // 强制设置为医生角色
+        roleId: 2, // 强制设置为医生角色
+        userId: Number(editForm.value.id), // 关联用户ID
+        dailyMaxNum: 20, // 默认值（可扩展）
+        workTime: '' // 出诊时间（可扩展）
       }
 
       editLoading.value = true
@@ -741,7 +795,7 @@ const submitEditForm = async () => {
   })
 }
 
-// 获取医生列表（包含职称筛选）
+// 获取医生列表（包含科室名称筛选）
 const getDoctorList = async () => {
   try {
     loading.value = true
@@ -749,7 +803,8 @@ const getDoctorList = async () => {
     const params = {
       ...searchForm.value,
       ...(searchForm.value.status ? {status: Number(searchForm.value.status)} : {}),
-      ...(searchForm.value.title ? {title: searchForm.value.title} : {})
+      ...(searchForm.value.title ? {title: searchForm.value.title} : {}),
+      ...(searchForm.value.deptName ? {deptName: searchForm.value.deptName} : {}) // 新增科室名称筛选
     }
     // 强制设置角色ID为2（医生）
     params.roleId = 2
@@ -766,7 +821,7 @@ const getDoctorList = async () => {
   }
 }
 
-// 重置搜索条件（包含职称筛选）
+// 重置搜索条件（包含科室名称筛选）
 const resetSearch = () => {
   searchForm.value = {
     pageNum: 1,
@@ -776,6 +831,7 @@ const resetSearch = () => {
     identityCard: '',
     realName: '',
     title: '',
+    deptName: '', // 新增科室名称重置
     status: ''
   }
   getDoctorList()
@@ -838,6 +894,11 @@ const handleUpdateStatus = async (row) => {
 
 // 单个删除（适配后端物理删除逻辑）
 const handleSingleDelete = async (row) => {
+  if (row.status === 1) {
+    ElMessage.warning('只能删除禁用状态的医生账号，无法删除启用状态的账号')
+    return
+  }
+
   try {
     await ElMessageBox.confirm(
         `【⚠️ 高危操作】确定要彻底删除该医生账号吗？
@@ -867,6 +928,12 @@ const handleBatchDelete = async () => {
     return
   }
 
+  const enableRows = selectedRows.value.filter(item => item.status === 1)
+  if (enableRows.length > 0) {
+    ElMessage.warning(`选中${selectedRows.value.length}个账号，其中${enableRows.length}个为启用状态，仅可删除禁用账号`)
+    return
+  }
+
   try {
     await ElMessageBox.confirm(
         `【⚠️ 高危操作】确定要彻底删除选中的${selectedRows.value.length}个医生账号吗？
@@ -890,16 +957,16 @@ const handleBatchDelete = async () => {
   }
 }
 
-// 页面初始化加载列表
+// 页面初始化加载列表和科室列表
 onMounted(() => {
   getDoctorList()
+  getDeptList()
 })
 </script>
 
 <style scoped>
 /* 全局容器 */
 .doctor-manage-container {
-  padding: 16px; /* 减少整体内边距 */
   background-color: #f8f9fa;
   min-height: calc(100vh - 64px);
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
@@ -964,22 +1031,6 @@ onMounted(() => {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px; /* 从16px 20px减少到12px 16px */
-  border-bottom: 1px solid #f0f2f5;
-}
-
-.card-title {
-  font-size: 15px; /* 从16px减少到15px */
-  font-weight: 600;
-  color: #2d3748;
-  display: flex;
-  align-items: center;
-  gap: 6px; /* 从8px减少到6px */
-}
 
 /* 搜索表单 - 核心调整：减少间距和内边距 */
 .search-form {
@@ -1043,7 +1094,7 @@ onMounted(() => {
 
 .action-btn {
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: 4px 0;
   transition: all 0.2s ease;
 }
 

@@ -40,4 +40,24 @@ public class UserPageQuery extends BaseEntity {
      * 状态：0-禁用，1-正常
      */
     private Integer status;
+
+    /**
+     * 科室名称
+     */
+    private String deptName;
+
+    /**
+     * 科室Id
+     */
+    private String deptId;
+
+    /**
+     * 医生工作时间
+     */
+    private String workTime;
+
+    /**
+     * 每日最大接诊数
+     */
+    private Long dailyMaxNum;
 }

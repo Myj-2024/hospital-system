@@ -37,6 +37,13 @@ const routes = [
                 component: () => import('../views/admin/system/nurse/index.vue'),
                 meta: {title: '护士管理', icon: 'Service', role: 'admin'}
             },
+            // 新增科室管理路由
+            {
+                path: 'system/department',
+                name: 'DepartmentManage',
+                component: () => import('../views/admin/system/department/index.vue'),
+                meta: {title: '科室管理', icon: 'OfficeBuilding', role: 'admin'}
+            },
             {
                 path: 'system/role',
                 name: 'RoleManage',
@@ -132,11 +139,29 @@ const router = createRouter({
     routes
 })
 
-// 路由守卫逻辑不变
+// 新增：标记是否是项目首次加载
+let isFirstLoad = true
+
+// 路由守卫逻辑修改
 router.beforeEach((to, from, next) => {
     const userStore = useUserStore()
     const hasToken = userStore.token
     const requiredAuth = to.meta.requiresAuth
+
+    // 核心修改1：首次加载/项目启动时，强制跳转到登录页（清空旧状态）
+    if (isFirstLoad) {
+        isFirstLoad = false // 仅首次触发
+        // 清空旧的登录状态
+        userStore.token = ''
+        userStore.role = ''
+        removeToken() // 需导入auth工具类
+        localStorage.removeItem('userRole')
+
+        if (to.path !== '/login') {
+            next('/login')
+            return
+        }
+    }
 
     if (to.path === '/login') {
         if (hasToken) {
@@ -174,5 +199,8 @@ router.beforeEach((to, from, next) => {
         next()
     }
 })
+
+// 导入auth工具类（补充：如果之前没导入）
+import {removeToken} from '@/utils/auth'
 
 export default router

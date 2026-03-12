@@ -121,6 +121,7 @@ import {useUserStore} from '@/store/modules/user'
 import {User, Lock, CircleCheck, OfficeBuilding} from '@element-plus/icons-vue'
 import {ElMessage} from 'element-plus'
 import {getCaptcha} from '@/api/user/index.js'
+import {removeToken} from '@/utils/auth' // 新增导入
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -200,13 +201,19 @@ const handleLogin = async () => {
 }
 
 onMounted(() => {
+  // 核心修改2：登录页加载时清空旧的登录状态
+  userStore.token = ''
+  userStore.role = ''
+  removeToken()
+  localStorage.removeItem('userRole')
+
   loadCaptcha()
-  // 初始化角色（页面刷新后恢复）
+  // 注释掉initRole，避免恢复旧角色
   // userStore.initRole()
 })
 </script>
 <style>
-/* 原有样式保持不变，此处省略（与你提供的一致） */
+/* 原有样式保持不变 */
 .login-container {
   height: 100vh;
   width: 100vw;

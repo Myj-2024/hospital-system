@@ -18,7 +18,8 @@ public class SysDoctor extends BaseEntity {
     /**
      * 科室ID
      */
-    private Long departmentId;
+    private Long deptId;
+
 
     /**
      * 职称
@@ -28,5 +29,20 @@ public class SysDoctor extends BaseEntity {
     /**
      * 擅长领域
      */
-    private String skill;
+    private String specialty;
+
+    /**
+     * 出诊时间
+     */
+    private String workTime;
+
+    /**
+     * 每日最大接诊数
+     */
+    private Long dailyMaxNum;
+
+    /**
+     * 科室名称
+     */
+    private String deptName;
 }
