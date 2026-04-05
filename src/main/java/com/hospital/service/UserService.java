@@ -1,0 +1,83 @@
+package com.hospital.service;
+
+import com.hospital.domain.base.PageResult;
+import com.hospital.domain.dto.UserDTO;
+import com.hospital.domain.dto.UserPageQueryDTO;
+import com.hospital.domain.entity.User;
+import com.hospital.domain.vo.UserVO;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @Author: JamHoo
+ * @Description: 用户服务接口
+ * @Date: 2026/3/13 18:37
+ * @Version: 1.0
+ */
+
+public interface UserService {
+
+	/**
+	 * 获取用户列表
+	 * @return List<User>
+	 */
+	List<User> getUserlist();
+
+	/**
+	 * 分页查询用户列表
+	 * @param dto
+	 * @return PageResult
+	 */
+	PageResult<UserVO> getUserPage(UserPageQueryDTO dto);
+
+	/**
+	 * 添加用户
+	 * @param userDTO
+	 * @return boolean
+	 */
+	boolean addUser(UserDTO userDTO);
+
+	/**
+	 * 删除用户
+	 * @param ids
+	 * @return boolean
+	 */
+	boolean deleteByIds(List<Long> ids, Long currentUserId);
+
+	/**
+	 * 修改用户
+	 * @param userDTO
+	 * @return boolean
+	 */
+	boolean updateById(UserDTO userDTO, Long currentUserId);
+
+	/**
+	 * 重置密码
+	 * @param id
+	 * @param defaultPwd
+	 * @return boolean
+	 */
+	boolean resetPassword(Long id, String defaultPwd, Long currentUserId);
+
+	/**
+	 * 修改用户状态
+	 * @param id
+	 * @param status
+	 * @return boolean
+	 */
+	boolean updateStatus(Long id, Integer status, Long currentUserId);
+
+	/**
+	 * 根据ID查询用户
+	 * @param id
+	 * @return User
+	 */
+	User getById(Long id);
+
+	/**
+	 * 获取处理人列表
+	 * @return List<Map<String, Object>>
+	 */
+	List<Map<String, Object>> getWorkerList();
+}

@@ -1,0 +1,71 @@
+package com.hospital.domain.entity;
+
+import com.hospital.domain.base.BaseEntity;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * @Author: JamHoo
+ * @Description: 用户实体类
+ * @Date: 2026/3/8 15:20
+ * @Version: 1.0
+ */
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class User extends BaseEntity implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * 用户名
+	 */
+	private String username;
+
+	/**
+	 * 密码
+	 */
+	private String password;
+
+	/**
+	 * 姓名
+	 */
+	private String realName;
+
+
+	/**
+	 * 部门ID
+	 */
+	private Integer deptId;
+
+
+	/**
+	 * 头像
+	 */
+	private String avatar;
+
+	/**
+	 * 手机号
+	 */
+	private String phone;
+
+	/**
+	 * 状态
+	 */
+	private Integer status;
+
+	/**
+	 * 角色名称
+	 */
+	private String roleName;
+
+	/**
+	 * 审核状态
+	 */
+	private Integer auditStatus;
+
+
+}

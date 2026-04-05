@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hospital.mapper.UserMapper">
+
+    <!--    数据库字段列表-->
+    <sql id="Base_Column_List">
+        id, username, password, avatar,dept_id, audit_status,real_name, phone, status, create_time, update_time
+    </sql>
+
+    <!-- ResultMap -->
+    <resultMap id="UserResultMap" type="com.hospital.domain.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="avatar" property="avatar"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="real_name" property="realName"/>
+        <result column="phone" property="phone"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="UserPageResultMap" type="com.hospital.domain.entity.User" extends="UserResultMap">
+        <result column="role_names" property="roleName"/>
+    </resultMap>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="selectByUsername" resultMap="UserResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_user
+        where username = #{username}
+    </select>
+
+    <!--    返回用户列表-->
+    <select id="getUserlist" resultMap="UserResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_user
+    </select>
+
+    <!--    分页查询用户列表-->
+    <select id="getUserPage" resultMap="UserPageResultMap">
+        SELECT
+        u.*, GROUP_CONCAT(r.role_name SEPARATOR ',') AS role_names
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+        LEFT JOIN sys_role r ON ur.role_id = r.id
+        <where>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="realName != null and realName != ''">
+                AND u.real_name LIKE CONCAT('%', #{realName}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                AND u.phone LIKE CONCAT('%', #{phone}, '%')
+            </if>
+            <if test="status != null">
+                AND u.status = #{status}
+            </if>
+        </where>
+        GROUP BY u.id
+        ORDER BY u.id
+    </select>
+
+    <!--    删除用户-->
+    <delete id="deleteByIds">
+        DELETE FROM sys_user
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!--    添加用户-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_user(username, password, avatar, real_name, phone, status, create_time, update_time)
+        values(#{username}, #{password}, #{avatar}, #{realName}, #{phone}, #{status}, NOW(), NOW())
+    </insert>
+
+    <!--    修改用户-->
+    <update id="update">
+        update sys_user
+        <set>
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="realName != null and realName != ''">real_name = #{realName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--    根据ID查询用户-->
+    <select id="selectById" resultMap="UserResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_user
+        where id = #{id}
+    </select>
+
+    <!--    检查用户名是否存在-->
+    <select id="checkUsernameExists" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM sys_user WHERE username = #{username}
+    </select>
+
+    <!--    查询员工列表-->
+    <resultMap id="WorkerUserMap" type="com.hospital.domain.entity.User">
+        <id column="id" property="id"/>
+        <result column="real_name" property="realName"/>
+        <result column="username" property="username"/>
+    </resultMap>
+
+    <select id="selectWorkerList" resultMap="WorkerUserMap">
+        SELECT DISTINCT
+        u.id,
+        u.real_name,
+        u.username
+        FROM sys_user u
+        INNER JOIN sys_user_role ur ON u.id = ur.user_id
+        INNER JOIN sys_role r ON ur.role_id = r.id
+        <where>
+            AND r.role_code IN ('ROLE_WORKER', 'ROLE_STAFF')
+            AND u.status = 1
+        </where>
+        ORDER BY u.id ASC
+    </select>
+
+    <!--    查询所有激活的用户ID-->
+    <select id="selectAllActiveUserIds" resultType="java.lang.Long">
+        SELECT id
+        FROM sys_user
+        WHERE status = 1
+    </select>
+
+    <!-- 获取指定公告的定向目标用户 -->
+    <select id="selectActiveUserVOs" resultType="com.hospital.domain.vo.UserSelectVO">
+        SELECT id, real_name as realName FROM sys_user WHERE status = 1
+    </select>
+</mapper>

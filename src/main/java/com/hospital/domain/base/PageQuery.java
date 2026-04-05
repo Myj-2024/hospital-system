@@ -1,0 +1,24 @@
+package com.hospital.domain.base;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * @Author: JamHoo
+ * @Description: 分页查询参数
+ * @Date: 2026/3/13 20:32
+ * @Version: 1.0
+ */
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class PageQuery extends BaseEntity{
+	/**
+	 * 当前页码
+	 */
+	private int pageNum;
+
+	/**
+	 * 每页数量
+	 */
+	private int pageSize=10;
+}

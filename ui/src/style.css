@@ -1,0 +1,103 @@
+/* ==========================================
+   引入自定义字体
+========================================== */
+@font-face {
+  font-family: 'PingFangSC';
+  /* 确保路径指向正确：./assets 是相对于 style.css 所在的根目录 */
+  src: url('./assets/fonts/PingFangSC-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  src: url('./assets/fonts/FiraCode-Regular.woff2') format('woff2'),
+  url('./assets/fonts/FiraCode-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 强制所有元素（包括 Element Plus 组件）使用该字体 */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  /* 修正：font-family 名称必须加引号，且确保 PingFangSC 和上面声明的一致 */
+  font-family: 'PingFangSC', 'Fira Code', 'Inter', -apple-system, sans-serif !important;
+}
+
+/* 关键修复：Element Plus 的输入框和按钮默认不继承 body 字体 */
+input,
+button,
+textarea,
+select,
+.el-button,
+.el-input__inner,
+.el-input__wrapper {
+  font-family: 'PingFangSC', 'Fira Code', 'Inter', -apple-system, sans-serif !important;
+}
+
+/* style.css */
+:root {
+  /* 统一为你的大厂蓝/紫色调 */
+  --van-primary-color: #4f46e5;
+  --van-success-color: #10b981;
+  --van-warning-color: #f97316;
+  --van-danger-color: #ef4444;
+
+  /* 也可以统一按钮的圆角风格 */
+  --van-button-border-radius: 8px;
+}
+
+/* ==========================================
+   全局链接与无障碍样式
+========================================== */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ==========================================
+   全局滚动条美化 (适配现代感 UI)
+========================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: rgba(144, 147, 153, 0.3);
+  transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(144, 147, 153, 0.5);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 全局样式文件中不要写 :deep */
+.el-input__inner:-webkit-autofill,
+.el-input__inner:-webkit-autofill:hover,
+.el-input__inner:-webkit-autofill:focus,
+.el-input__inner:-webkit-autofill:active {
+  /* 使用内阴影覆盖浏览器默认的淡黄色背景，此处假设背景为透明或白色 */
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  /* 这里的颜色应与你的输入框背景色一致 */
+  -webkit-text-fill-color: #606266 !important;
+}
+
+/* 如果要保持透明感，只能配合过渡动画 */
+.el-input__inner:-webkit-autofill {
+  transition: background-color 50000s ease-in-out 0s !important;
+}
