@@ -90,7 +90,20 @@ const routes = [
             }
         ]
     },
-    // 3. H5 移动端路由
+    // 3. 独立工作台路由 (全屏沉浸式页面，不继承 Layout)
+    {
+        path: '/workbench/nurse',
+        name: 'NurseWorkbench',
+        component: () => import('@/views/workbench/NurseWorkbench.vue'),
+        meta: {title: '护士工作台', requireAuth: true}
+    },
+    {
+        path: '/workbench/doctor',
+        name: 'DoctorWorkbench',
+        component: () => import('@/views/workbench/DoctorWorkbench.vue'),
+        meta: {title: '医生工作台', requireAuth: true}
+    },
+    // 4. H5 移动端路由
     {
         path: '/m',
         name: 'MobileLayout',

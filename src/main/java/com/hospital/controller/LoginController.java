@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @Author: JamHoo
  * @Description: 登录和注册控制器
  * @Date: 2026/3/10 09:21
  * @Version: 1.0
@@ -41,7 +40,7 @@ public class LoginController {
 	@Operation(summary = "登录")
 	public Result<LoginResultVO> login(@RequestBody UserLoginDTO dto) {
 		log.info("用户 {} 尝试登录", dto.getUsername());
-		LoginResultVO loginResult = loginService.login(dto.getUsername(), dto.getPassword());
+		LoginResultVO loginResult = loginService.login(dto.getUsername(), dto.getPassword(),dto.getLoginRole());
 		return Result.success(loginResult);
 	}
 

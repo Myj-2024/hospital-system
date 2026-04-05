@@ -44,4 +44,12 @@ public interface UserRoleMapper {
 	 * @return 最小的 role_sort，若无角色则返回 null
 	 */
 	Integer selectMinRoleSortByUserId(@Param("userId") Long userId);
+
+	/**
+	 * 校验用户是否拥有指定的角色编码
+	 * @param userId 用户ID
+	 * @param roleCodes 需要校验的角色编码集合
+	 * @return 匹配到的记录数
+	 */
+	int countUserRolesByCodes(@Param("userId") Long userId, @Param("roleCodes") List<String> roleCodes);
 }

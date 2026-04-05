@@ -23,6 +23,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class LoginServiceImpl implements LoginService {
 	 * @return TOKEN
 	 */
 	@Override
-	public LoginResultVO login(String username, String password) {
+	public LoginResultVO login(String username, String password, String loginRole) {
 		// 1. 根据用户名查询用户
 		User user = userMapper.selectByUsername(username);
 		if (user == null) {
@@ -80,13 +81,37 @@ public class LoginServiceImpl implements LoginService {
 			throw new BusinessException(ResponseCodeEnum.USER_STATUS_DISABLED);
 		}
 
+
+		// A. 根据前端传来的面板类型，确定需要校验的角色编码集合
+		List<String> requiredRoleCodes = new ArrayList<>();
+		if ("doctor".equals(loginRole)) {
+			requiredRoleCodes.add("ROLE_DOCTOR");
+		} else if ("nurse".equals(loginRole)) {
+			requiredRoleCodes.add("ROLE_NURSE");
+		} else if ("admin".equals(loginRole)) {
+			// 管理员面板可以包含多个高权限角色
+			requiredRoleCodes.add("ROLE_ADMIN");
+			requiredRoleCodes.add("ROLE_MEDICAL_AFFAIRS");
+		} else {
+			throw new BusinessException("非法的登录角色类型");
+		}
+
+		// B. 调用 Mapper 直接去数据库查询该用户是否具备该面板权限
+		int matchCount = userRoleMapper.countUserRolesByCodes(user.getId(), requiredRoleCodes);
+
+		if (matchCount <= 0) {
+			log.warn("用户 {} 尝试以 {} 身份登录，但数据库中未匹配到相应角色", username, loginRole);
+			throw new BusinessException("登录失败：您不具备该身份的操作权限");
+		}
+
+
 		// 4. 查询角色、权限以及最高等级
 		List<String> roles = roleMapper.getRoleCodesByUserId(user.getId());
 
 		// 查询权限标识列表 (如: ["user:add"])
 		List<String> permissions = menuMapper.selectPermsByUserId(user.getId());
 
-		// --- 新增：查询当前登录用户的最高角色权重 (role_sort 最小值) ---
+		// 查询当前登录用户的最高角色权重 (role_sort 最小值) ---
 		Integer topRoleSort = userRoleMapper.selectMinRoleSortByUserId(user.getId());
 
 		// 5. 生成 Token

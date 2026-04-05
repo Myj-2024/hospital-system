@@ -1,22 +1,11 @@
 <template>
   <div class="login-container" :class="[isDark ? 'dark-theme' : 'light-theme']">
-    <div class="desktop-top-actions">
-      <div class="action-pill">
-        <div class="action-icon" @click="isDark = !isDark">
-          <el-icon :size="16">
-            <Sunny v-if="!isDark"/>
-            <Moon v-else/>
-          </el-icon>
-        </div>
-      </div>
-    </div>
-
     <div class="mobile-top-bar">
       <el-button type="primary" size="small" icon="Back" @click="router.push('/home')"
                  class="mobile-back-btn">
         返回首页
       </el-button>
-      <span class="mobile-brand-name">智慧门诊综合系统</span>
+      <span class="mobile-brand-name">智慧门诊综合管理系统</span>
       <div class="action-icon mobile-theme-toggle" @click="isDark = !isDark">
         <el-icon :size="16">
           <Sunny v-if="!isDark"/>
@@ -61,9 +50,28 @@
             </div>
           </div>
         </div>
+        <div class="back-btn">
+          <el-button type="info" link @click="router.push('/home') "
+                     style="color: #ffffff ">
+            <el-icon>
+              <Back/>
+            </el-icon>
+            返回首页
+          </el-button>
+        </div>
       </div>
 
       <div class="login-right">
+        <div class="desktop-top-actions">
+          <div class="action-pill">
+            <div class="action-icon" @click="isDark = !isDark">
+              <el-icon :size="16">
+                <Sunny v-if="!isDark"/>
+                <Moon v-else/>
+              </el-icon>
+            </div>
+          </div>
+        </div>
         <div class="form-wrapper">
           <div class="welcome-text">
             <h2>欢迎登录</h2>
@@ -259,9 +267,8 @@ const handleLogin = async () => {
     const res = await loginApi({
       username: username.value,
       password: password.value,
-      mode: loginMode.value
-      // 业务如有需求，可将新增的 role 字段也传给后端：
-      // role: loginRole.value
+      mode: loginMode.value,
+      loginRole: loginRole.value
     })
 
     const {token, user, roles, permissions} = res.data
@@ -273,36 +280,28 @@ const handleLogin = async () => {
     userStore.setPermissions(permissions)
 
     ElMessage.success('欢迎回来')
+    const isMobile = isMobileDevice()
+    const redirectPath = router.currentRoute.value.query.redirect
+    let targetPath = '/home'
 
-    setTimeout(() => {
-      const isMobile = isMobileDevice()
-      const redirectPath = router.currentRoute.value.query.redirect
+    // 基于实际角色进行动态路由跳转
+    if (roles.includes('ROLE_DOCTOR')) {
+      targetPath = isMobile ? '/m/doctor/dashboard' : '/workbench/doctor'
+    } else if (roles.includes('ROLE_NURSE')) {
+      targetPath = isMobile ? '/m/nurse/dashboard' : '/workbench/nurse'
+    } else if (roles.includes('ROLE_ADMIN') || roles.includes('ROLE_MEDICAL_AFFAIRS')) {
+      targetPath = '/index/dashboard'
+    }
 
-      // 检查 roles 数组中是否包含 STAFF 或 WORKER
-      const isStaffOrWorker = roles.some(role => ['ROLE_STAFF', 'ROLE_WORKER'].includes(role))
-
-      if (isStaffOrWorker) {
-        // 员工/工人角色，强制忽略 redirect，直接跳对应页面
-        if (isMobile) {
-          // 移动端：强制跳工单列表
-          router.push('/m/worker/list')
-        } else {
-          // PC端：强制跳管理工作台，不使用redirect
-          router.push('/home')
-        }
-        return
-      }
-
-      // 普通用户/企业角色，才走重定向逻辑
-      router.push(redirectPath || '/home')
-
-    }, 200)
+    // 如果有 redirect 并且不是特殊强制跳页，则优先跳转 redirect
+    router.push(redirectPath || targetPath)
 
   } catch (error) {
     isPassed.value = false
     sliderWidth.value = 0
     console.error('登录异常:', error)
-    ElMessage.error('登录失败，请检查账号密码')
+    // 错误提示尽量依赖后端返回的具体 message (如："该账号无该身份权限")
+    ElMessage.error(error.message || '登录失败，请检查账号密码或权限')
   } finally {
     loginLoading.value = false
   }
@@ -396,6 +395,15 @@ onUnmounted(() => onSliderEnd())
   opacity: 0.15;
   mix-blend-mode: overlay;
   z-index: 1;
+}
+
+.back-btn {
+  position: relative;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+  z-index: 2;
 }
 
 .left-content {

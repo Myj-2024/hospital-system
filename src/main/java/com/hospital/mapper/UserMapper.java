@@ -90,4 +90,5 @@ public interface UserMapper {
 	 * 获取所有正常状态(在职/未封禁)的用户ID
 	 */
 	List<Long> selectAllActiveUserIds();
+
 }

@@ -10,7 +10,7 @@ public interface LoginService {
 	 * @param password 密码
 	 * @return String
 	 */
-	LoginResultVO login(String username, String password);
+	LoginResultVO login(String username, String password, String loginRole);
 
 	/**
 	 * 注册

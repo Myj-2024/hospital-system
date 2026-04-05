@@ -5,7 +5,6 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @Author: JamHoo
  * @Description: 用户登录参数
  * @Date: 2026/3/8 15:23
  * @Version: 1.0
@@ -20,4 +19,9 @@ public class UserLoginDTO implements Serializable {
 	 * 密码
 	 */
 	private String password;
+
+	/**
+	 * 登录角色
+	 */
+	private  String loginRole;
 }

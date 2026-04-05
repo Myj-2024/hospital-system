@@ -68,4 +68,8 @@ public class User extends BaseEntity implements Serializable {
 	private Integer auditStatus;
 
 
+	/**
+	 * 登录角色
+	 */
+	private String loginRole;
 }

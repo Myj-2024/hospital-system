@@ -6,7 +6,7 @@
           <div class="logo">
             <img src="/icon.png" alt="logo">
           </div>
-          <span v-if="!isCollapse" class="logo-text">经济开发区管理平台</span>
+          <span v-if="!isCollapse" class="logo-text">智慧门诊综合系统</span>
         </div>
 
         <div class="collapse-btn-wrapper" @click="isCollapse = !isCollapse">

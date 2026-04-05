@@ -24,7 +24,6 @@
           <el-menu-item index="/policy">政策中心</el-menu-item>
           <el-menu-item index="/notice">通知公告</el-menu-item>
           <el-menu-item index="/enterprise">企业风采</el-menu-item>
-          <el-menu-item v-if="isEnterprise" index="/my-enterprise">企业服务中心</el-menu-item>
         </el-menu>
       </nav>
 
@@ -73,145 +72,6 @@
             </el-tag>
           </div>
 
-          <el-button
-              v-if="isStaff && isMobile"
-              type="primary"
-              size="small"
-              round
-              icon="Document"
-              @click="router.push('/m/worker/list')"
-              style="margin-right: 12px;"
-          >
-            工单处理
-          </el-button>
-
-          <el-popover
-              v-if="userStore.token"
-              placement="bottom-end"
-              :width="320"
-              trigger="click"
-              popper-class="notice-center-popper"
-              :offset="15"
-          >
-            <template #reference>
-              <el-badge
-                  :value="totalNoticeCount"
-                  :max="99"
-                  :hidden="totalNoticeCount <= 0"
-                  class="notice-badge"
-                  style="margin-right: 20px;"
-              >
-                <el-icon class="notice-bell-icon">
-                  <Bell/>
-                </el-icon>
-              </el-badge>
-            </template>
-
-            <div class="notice-panel">
-              <div class="notice-panel-header">
-                <span class="title">待办通知</span>
-                <span class="count-tag" v-if="totalNoticeCount > 0">{{ totalNoticeCount }} 条提醒</span>
-              </div>
-
-              <div class="notice-panel-body">
-                <template v-if="isAdmin || userStore.roles.includes('ROLE_STAFF')">
-                  <div class="group-label">园区行政</div>
-                  <div class="notice-card" @click="handleNav('/business/enterprise/list')">
-                    <div class="card-icon ent-bg">
-                      <el-icon>
-                        <Monitor/>
-                      </el-icon>
-                    </div>
-                    <div class="card-info">
-                      <div class="label">入驻（迁出）审核</div>
-                      <div class="value">{{ enterprisePendingCount }} <small>家待办</small></div>
-                    </div>
-                    <el-icon class="arrow-right">
-                      <ArrowRight/>
-                    </el-icon>
-                  </div>
-                  <el-divider style="margin: 8px 0"/>
-                </template>
-
-                <template v-if="isEnterprise && myEnterpriseNoticeCount > 0">
-                  <div class="group-label">入驻（迁出）进度</div>
-
-                  <div v-if="enterpriseStatus === 0 || enterpriseStatus === 4"
-                       class="notice-card" @click="handleNav('/my-enterprise')">
-                    <div class="card-icon ent-bg">
-                      <el-icon>
-                        <Timer/>
-                      </el-icon>
-                    </div>
-                    <div class="card-info">
-                      <div class="label">{{ enterpriseStatus === 0 ? '入驻申请' : '迁出申请' }}</div>
-                      <div class="value">审核中<small>请耐心等待</small></div>
-                    </div>
-                    <el-icon class="arrow-right">
-                      <ArrowRight/>
-                    </el-icon>
-                  </div>
-
-                  <div v-if="enterpriseStatus === 2"
-                       class="notice-card" @click="handleNav('/my-enterprise')">
-                    <div class="card-icon order-pending-bg">
-                      <el-icon>
-                        <Warning/>
-                      </el-icon>
-                    </div>
-                    <div class="card-info">
-                      <div class="label">审核反馈</div>
-                      <div class="value" style="color: #f56c6c;">申请被驳回<small>请查看原因</small></div>
-                    </div>
-                    <el-icon class="arrow-right">
-                      <ArrowRight/>
-                    </el-icon>
-                  </div>
-                </template>
-
-                <div v-if="isAdmin || isStaff" class="group-label">工单运维</div>
-
-                <div v-if="isAdmin || userStore.roles.includes('ROLE_STAFF')" class="notice-card"
-                     @click="handleNav('/business/workorder/list')">
-                  <div class="card-icon order-pending-bg">
-                    <el-icon>
-                      <Tools/>
-                    </el-icon>
-                  </div>
-                  <div class="card-info">
-                    <div class="label">待受理工单</div>
-                    <div class="value">{{ orderStats.pendingCount }} <small>个待分派</small></div>
-                  </div>
-                  <el-icon class="arrow-right">
-                    <ArrowRight/>
-                  </el-icon>
-                </div>
-
-                <div v-if="isAdmin || isStaff" class="notice-card" @click="handleNav('/business/workorder/list')">
-                  <div class="card-icon order-processing-bg">
-                    <el-icon>
-                      <Loading/>
-                    </el-icon>
-                  </div>
-                  <div class="card-info">
-                    <div class="label">待处理工单</div>
-                    <div class="value">{{ orderStats.processingCount }} <small>个待处理</small></div>
-                  </div>
-                  <el-icon class="arrow-right">
-                    <ArrowRight/>
-                  </el-icon>
-                </div>
-              </div>
-
-              <div class="notice-panel-footer" @click="fetchAllNotifications">
-                <el-icon>
-                  <Refresh/>
-                </el-icon>
-                <span>刷新数据</span>
-              </div>
-            </div>
-          </el-popover>
-
           <el-dropdown trigger="click" @command="handleCommand">
             <div class="user-avatar-wrapper">
               <el-avatar :size="32" :src="userStore.userInfo?.avatar"
@@ -226,7 +86,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item
-                    v-if="isAdmin || isStaff"
+                    v-if="isAdmin"
                     command="dashboard"
                     icon="Monitor"
                     style="color: #409EFF;"
@@ -235,12 +95,20 @@
                 </el-dropdown-item>
 
                 <el-dropdown-item
-                    v-if="isEnterprise"
-                    command="enterprise"
+                    v-if="isDoctor"
+                    command="doctorworkbench"
                     icon="Memo"
                     style="color: #67C23A;"
                 >
-                  企业服务中心
+                  进入工作台
+                </el-dropdown-item>
+                <el-dropdown-item
+                    v-if="isNurse"
+                    command="nurseworkbench"
+                    icon="Memo"
+                    style="color: #67C23A;"
+                >
+                  进入工作台
                 </el-dropdown-item>
                 <el-dropdown-item command="profile" icon="User">个人中心</el-dropdown-item>
                 <el-dropdown-item divided command="logout" icon="SwitchButton">退出登录</el-dropdown-item>
@@ -269,7 +137,6 @@
         <el-menu-item index="/policy">政策中心</el-menu-item>
         <el-menu-item index="/notice">通知公告</el-menu-item>
         <el-menu-item index="/enterprise">企业风采</el-menu-item>
-        <el-menu-item v-if="isEnterprise" index="/my-enterprise">企业服务中心</el-menu-item>
       </el-menu>
     </el-drawer>
 
@@ -360,31 +227,11 @@ const orderStats = ref({
 })
 let noticeTimer = null
 
-// 计算总通知数
-const totalNoticeCount = computed(() => {
-  if (!userStore.token) return 0
-  let count = 0
-
-  // 管理员/职员逻辑
-  if (isAdmin.value || isStaff.value) {
-    count += (enterprisePendingCount.value || 0)
-    count += (orderStats.value.pendingCount || 0)
-    count += (orderStats.value.processingCount || 0)
-  }
-
-  // 企业用户逻辑 (加上新接口的返回数)
-  if (isEnterprise.value) {
-    count += (myEnterpriseNoticeCount.value || 0)
-  }
-
-  return count
-})
-
 // 获取数据的核心方法
 const fetchAllNotifications = async () => {
   if (!userStore.token) return
   const roles = userStore.roles || []
-  const isAdminOrStaff = roles.includes('ROLE_ADMIN') || roles.includes('ROLE_STAFF')
+  const isAdminOrStaff = roles.includes('ROLE_ADMIN') || roles.includes('ROLE_MEDICAL_AFFAIRS')
   const isEnterpriseUser = roles.includes('ROLE_ENTERPRISE')
 
   try {
@@ -414,18 +261,12 @@ const fetchAllNotifications = async () => {
       enterprisePendingCount.value = entPendingRes.data
     }
 
-    // 企业端：更新个人通知
     if (myNoticeRes && myNoticeRes.code === 200) {
       myEnterpriseNoticeCount.value = myNoticeRes.data
     }
   } catch (error) {
     console.error('同步通知数据失败', error)
   }
-}
-
-// 处理通知点击跳转 (根据路由结构调整)
-const handleNav = (path) => {
-  router.push(path)
 }
 
 // 移动端抽屉状态
@@ -459,10 +300,10 @@ watch(() => userStore.token, (val) => {
   if (val) fetchStatus()
   else enterpriseStatus.value = null
 }, {immediate: true})
-// --- 企业状态逻辑结束 ---
 
 const isAdmin = computed(() => userStore.roles.includes('ROLE_ADMIN') || userStore.roles.includes('ROLE_MEDICAL_AFFAIRS'))
-const isStaff = computed(() => userStore.roles.includes('ROLE_STAFF'))
+const isDoctor = computed(() => userStore.roles.includes('ROLE_DOCTOR'))
+const isNurse = computed(() => userStore.roles.includes('ROLE_NURSE'))
 const isEnterprise = computed(() => userStore.roles.includes('ROLE_ENTERPRISE'))
 
 const profileVisible = ref(false)
@@ -567,8 +408,11 @@ const handleCommand = (command) => {
     case 'dashboard':
       router.push('/index/dashboard')
       break
-    case 'enterprise':
-      router.push('/my-enterprise')
+    case 'doctorworkbench':
+      router.push('/workbench/doctor')
+      break
+    case 'nurseworkbench':
+      router.push('/workbench/nurse')
       break
     case 'logout':
       confirmLogout()

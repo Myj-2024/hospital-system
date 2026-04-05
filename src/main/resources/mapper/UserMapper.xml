@@ -145,4 +145,5 @@
     <select id="selectActiveUserVOs" resultType="com.hospital.domain.vo.UserSelectVO">
         SELECT id, real_name as realName FROM sys_user WHERE status = 1
     </select>
+
 </mapper>
