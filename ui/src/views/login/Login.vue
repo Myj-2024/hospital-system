@@ -1,179 +1,166 @@
 <template>
   <div class="login-container" :class="[isDark ? 'dark-theme' : 'light-theme']">
-
-    <div class="login-left">
-      <div class="brand-logo">
-        <div class="logo-icon">
-          <el-icon :size="25" color="var(--text-main)">
-            <OfficeBuilding/>
-          </el-icon>
-        </div>
-        <span class="brand-name">智慧门诊综合管理系统</span>
-        <el-button type="primary" size="default" icon="Back" @click="router.push('/home')"
-                   class="back-btn">
-          返回首页
-        </el-button>
-      </div>
-
-      <div class="illustration-content">
-        <img src="@/assets/ILLUSTRATION.png" alt="illustration" class="login-3d-img"/>
-        <h2 class="illustration-title">数字赋能园区，智慧连接未来</h2>
-        <p class="illustration-desc">数字化赋能政务，让企业服务更高效</p>
-      </div>
-    </div>
-
-    <div class="login-right">
-      <div class="mobile-top-bar">
-        <el-button type="primary" size="small" icon="Back" @click="router.push('/home')"
-                   class="mobile-back-btn">
-          返回首页
-        </el-button>
-        <span class="mobile-brand-name">智慧门诊综合管理系统</span>
-        <div class="action-icon mobile-theme-toggle" @click="isDark = !isDark">
+    <div class="desktop-top-actions">
+      <div class="action-pill">
+        <div class="action-icon" @click="isDark = !isDark">
           <el-icon :size="16">
             <Sunny v-if="!isDark"/>
             <Moon v-else/>
           </el-icon>
         </div>
       </div>
+    </div>
 
-      <div class="desktop-top-actions">
-        <div class="action-pill">
-          <div class="action-icon" @click="isDark = !isDark">
-            <el-icon :size="16">
-              <Sunny v-if="!isDark"/>
-              <Moon v-else/>
-            </el-icon>
+    <div class="mobile-top-bar">
+      <el-button type="primary" size="small" icon="Back" @click="router.push('/home')"
+                 class="mobile-back-btn">
+        返回首页
+      </el-button>
+      <span class="mobile-brand-name">智慧门诊综合系统</span>
+      <div class="action-icon mobile-theme-toggle" @click="isDark = !isDark">
+        <el-icon :size="16">
+          <Sunny v-if="!isDark"/>
+          <Moon v-else/>
+        </el-icon>
+      </div>
+    </div>
+
+    <div class="login-box">
+      <div class="login-left">
+        <div class="left-content">
+          <div class="logo-area">
+            <div class="logo-icon-wrapper">
+              <span class="med-symbol">⚕</span>
+            </div>
+            <h1 class="sys-title">智慧门诊综合管理系统</h1>
+            <p class="sys-en-title">Smart Outpatient Management System</p>
+          </div>
+
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feat-icon">
+                <el-icon :size="18">
+                  <UserFilled/>
+                </el-icon>
+              </div>
+              <div class="feat-text">
+                <div class="feat-title">全流程数字化</div>
+                <div class="feat-desc">从挂号到结算，全链路智能闭环</div>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feat-icon">
+                <el-icon :size="18">
+                  <HelpFilled/>
+                </el-icon>
+              </div>
+              <div class="feat-text">
+                <div class="feat-title">数据安全保障</div>
+                <div class="feat-desc">银行级加密，敏感信息自动脱敏</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="form-wrapper">
-        <div class="welcome-text">
-          <h2>欢迎加入经济开发区 👋</h2>
-          <p style="font-size: 15px">请登录账号后提交申请入驻资料</p>
+      <div class="login-right">
+        <div class="form-wrapper">
+          <div class="welcome-text">
+            <h2>欢迎登录</h2>
+            <p>请使用您的医护人员账号或管理员账号登录</p>
+          </div>
+
+          <div class="role-container">
+            <div class="input-label">登录角色</div>
+            <div class="role-list">
+              <div class="role-item" :class="{ active: loginRole === 'doctor' }" @click="loginRole = 'doctor'">
+                <el-icon>
+                  <User/>
+                </el-icon>
+                <span>医生</span>
+              </div>
+              <div class="role-item" :class="{ active: loginRole === 'nurse' }" @click="loginRole = 'nurse'">
+                <el-icon>
+                  <Avatar/>
+                </el-icon>
+                <span>护士</span>
+              </div>
+              <div class="role-item" :class="{ active: loginRole === 'admin' }" @click="loginRole = 'admin'">
+                <el-icon>
+                  <Management/>
+                </el-icon>
+                <span>管理员</span>
+              </div>
+            </div>
+          </div>
+
+          <el-form label-width="0" size="large" class="custom-form">
+            <template v-if="loginMode === 'account'">
+              <div class="input-label">工号 / 账号</div>
+              <el-form-item class="custom-input-item">
+                <el-input v-model="username" placeholder="请输入您的工号">
+                  <template #prefix>
+                    <el-icon>
+                      <User/>
+                    </el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <div class="input-label">密码</div>
+              <el-form-item class="custom-input-item">
+                <el-input v-model="password" type="password" placeholder="••••••••" show-password>
+                  <template #prefix>
+                    <el-icon>
+                      <Lock/>
+                    </el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+            </template>
+
+            <el-form-item class="slider-form-item">
+              <div class="slider-track" ref="sliderTrack">
+                <div class="slider-fill" :style="{ width: sliderWidth + 'px' }"></div>
+                <div class="slider-text" :class="{ 'is-passed': isPassed }">
+                  {{ isPassed ? '验证通过' : '请按住滑块拖动' }}
+                </div>
+                <div
+                    class="slider-btn"
+                    @mousedown="onSliderStart"
+                    @touchstart="onSliderStart"
+                    :style="{ transform: `translateX(${sliderWidth}px)` }"
+                    :class="{ 'is-passed': isPassed }"
+                >
+                  <el-icon v-if="!isPassed" :size="14">
+                    <DArrowRight/>
+                  </el-icon>
+                  <el-icon v-else :size="14" style="color: #ffffff">
+                    <CircleCheckFilled/>
+                  </el-icon>
+                </div>
+              </div>
+            </el-form-item>
+
+            <div class="form-footer-actions">
+              <el-checkbox v-model="rememberMe" class="custom-checkbox">记住我</el-checkbox>
+              <el-link type="primary" underline="never" class="forget-pwd">忘记密码？</el-link>
+            </div>
+
+            <el-form-item class="submit-item">
+              <el-button type="primary" @click="handleLogin" class="submit-btn" :disabled="!isPassed"
+                         :loading="loginLoading">
+                安全登录
+              </el-button>
+            </el-form-item>
+
+          </el-form>
         </div>
 
-        <el-form label-width="0" size="large" class="custom-form">
-          <template v-if="loginMode === 'account'">
-            <el-form-item class="custom-input-item">
-              <el-input v-model="username" placeholder="请输入账号">
-                <template #prefix>
-                  <el-icon>
-                    <User/>
-                  </el-icon>
-                </template>
-              </el-input>
-            </el-form-item>
-            <el-form-item class="custom-input-item">
-              <el-input v-model="password" type="password" placeholder="请输入密码" show-password>
-                <template #prefix>
-                  <el-icon>
-                    <Lock/>
-                  </el-icon>
-                </template>
-              </el-input>
-            </el-form-item>
-          </template>
-
-          <template v-if="loginMode === 'mobile'">
-            <el-form-item class="custom-input-item">
-              <el-input v-model="username" placeholder="请输入手机号"></el-input>
-            </el-form-item>
-            <el-form-item class="custom-input-item">
-              <el-input v-model="password" placeholder="请输入 6 位验证码">
-                <template #append>
-                  <el-button link class="code-btn-custom">获取验证码</el-button>
-                </template>
-              </el-input>
-            </el-form-item>
-          </template>
-
-          <el-form-item class="slider-form-item">
-            <div class="slider-track" ref="sliderTrack">
-              <div class="slider-fill" :style="{ width: sliderWidth + 'px' }"></div>
-              <div class="slider-text" :class="{ 'is-passed': isPassed }">
-                {{ isPassed ? '验证通过' : '请按住滑块拖动' }}
-              </div>
-              <div
-                  class="slider-btn"
-                  @mousedown="onSliderStart"
-                  @touchstart="onSliderStart"
-                  :style="{ transform: `translateX(${sliderWidth}px)` }"
-                  :class="{ 'is-passed': isPassed }"
-              >
-                <el-icon v-if="!isPassed" :size="14">
-                  <DArrowRight/>
-                </el-icon>
-                <el-icon v-else :size="14" style="color: #929496">
-                  <CircleCheckFilled/>
-                </el-icon>
-              </div>
-            </div>
-          </el-form-item>
-
-          <div class="form-footer-actions">
-            <el-checkbox v-model="rememberMe" class="custom-checkbox">记住账号</el-checkbox>
-            <el-link type="primary" underline="never" class="forget-pwd">忘记密码？</el-link>
-          </div>
-
-          <el-form-item class="submit-item">
-            <el-button type="primary" @click="handleLogin" class="submit-btn" :disabled="!isPassed"
-                       :loading="loginLoading">
-              登 录
-            </el-button>
-          </el-form-item>
-
-          <div class="alt-login-buttons">
-            <el-button class="alt-btn" @click="loginMode = 'account'">账号登录</el-button>
-            <el-button class="alt-btn" @click="loginMode = 'mobile'">手机号登录</el-button>
-          </div>
-
-          <div class="third-party-login">
-            <el-divider class="custom-divider">其他登录方式</el-divider>
-            <div class="social-icons">
-              <div class="social-icon wechat">
-                <svg viewBox="0 0 1024 1024" width="20" height="20">
-                  <path
-                      d="M682.666667 362.666667c-174.933333 0-320 123.733333-320 277.333333 0 85.333333 46.933333 162.133333 123.733333 213.333333l-34.133333 68.266667 81.066667-42.666667c46.933333 17.066667 98.133333 25.6 149.333333 25.6 174.933333 0 320-123.733333 320-277.333333S857.6 362.666667 682.666667 362.666667z m-110.933334 162.133333c-17.066667 0-34.133333-12.8-34.133333-29.866667s17.066667-29.866667 34.133333-29.866667 34.133333 12.8 34.133333 29.866667-17.066667 29.866667-34.133333 29.866667z m221.866667 0c-17.066667 0-34.133333-12.8-34.133333-29.866667s17.066667-29.866667 34.133333-29.866667 34.133333 12.8 34.133333 29.866667-17.066667 29.866667-34.133333 29.866667z M362.666667 588.8c0-8.533333 0-17.066667 4.266666-25.6C209.066667 541.866667 85.333333 422.4 85.333333 277.333333 85.333333 123.733333 243.2 0 426.666667 0s341.333333 123.733333 341.333333 277.333333c0 29.866667-4.266667 55.466667-12.8 81.066667-21.333333-4.266667-42.666667-4.266667-64-4.266667-200.533333 0-362.666667 149.333333-362.666667 334.933334 0 34.133333 8.533333 64 21.333334 93.866666-4.266667 4.266667-12.8 4.266667-17.066667 4.266667-46.933333 0-89.6-12.8-128-34.133334l-68.266666 38.4 29.866666-59.733333c-64-46.933333-102.4-110.933333-102.4-187.733334z m-106.666667-362.666667c-21.333333 0-38.4-17.066667-38.4-38.4s17.066667-38.4 38.4-38.4 38.4 17.066667 38.4 38.4-17.066667 38.4-38.4 38.4z m315.733333 0c-21.333333 0-38.4-17.066667-38.4-38.4s17.066667-38.4 38.4-38.4 38.4 17.066667 38.4 38.4-17.066667 38.4-38.4 38.4z"
-                      fill="#07C160"></path>
-                </svg>
-              </div>
-              <div class="social-icon github">
-                <svg viewBox="0 0 1024 1024" width="20" height="20">
-                  <path
-                      d="M511.6 76.3C264.3 76.2 64 276.4 64 523.5 64 718.9 189.3 885 363.8 946c23.5 5.9 19.9-10.8 19.9-22.2v-77.5c-135.7 15.9-141.2-73.9-150.3-88.9C215 726 171.5 718 184.5 703c30.9-15.9 62.4 4 98.9 57.9 26.4 39.1 77.9 32.5 104 26 5.7-23.5 17.9-44.5 34.7-60.8-140.6-25.2-199.2-111-199.2-213 0-49.5 16.3-95 48.3-131.7-20.4-60.5 1.9-112.3 4.9-120 58.1-5.2 118.5 41.6 123.2 45.3 33-8.9 70.7-13.6 112.9-13.6 42.4 0 80.2 4.9 113.5 13.9 11.3-8.6 67.3-48.8 121.3-43.9 2.9 7.7 24.7 58.3 5.5 118 32.4 36.8 48.9 82.7 48.9 132.3 0 102.2-59 188.1-200 212.9 23.5 23.2 38.1 55.4 38.1 91v112.5c0.8 9 0 27.9 25 21.5C898.1 872.4 1024 737.5 1024 523.5c0-246.7-199.9-447.2-446.8-447.2h-65.6z"
-                      :fill="isDark ? '#FFFFFF' : '#1E293B'"></path>
-                </svg>
-              </div>
-              <div class="social-icon google">
-                <svg viewBox="0 0 1024 1024" width="20" height="20">
-                  <path
-                      d="M523.8 438.9v164.2h255.4c-10.4 53.6-40.4 99.2-85.3 131.4v109.1h138c80.8-74.4 127.4-184.1 127.4-311.2 0-21.7-1.9-42.6-5.6-62.8L523.8 438.9z"
-                      fill="#4285F4"></path>
-                  <path
-                      d="M512 1024c136 0 250.2-45.1 333.6-122l-138-109.1c-45.1 30.2-102.7 48.1-195.6 48.1-150.3 0-277.5-101.5-322.9-238h-143v110.6C129.5 869 304.7 1024 512 1024z"
-                      fill="#34A853"></path>
-                  <path
-                      d="M189.1 603c-11.4-34-18-70.5-18-108.3s6.6-74.3 18-108.3V275.8h-143C17.2 334.3 0 411.3 0 494.7s17.2 160.4 46.1 218.9l143-110.6z"
-                      fill="#FBBC05"></path>
-                  <path
-                      d="M512 189.3c74 0 140.5 25.4 192.8 75.3l144.6-144.6C761.9 41.5 647.7 0 512 0 304.7 0 129.5 155 46.1 310.5l143 110.6C234.5 284.6 361.7 189.3 512 189.3z"
-                      fill="#EA4335"></path>
-                </svg>
-              </div>
-            </div>
-
-            <div class="register-link">
-              还没有账号？
-              <el-link type="primary" underline="never" @click="goToRegister">注册账号</el-link>
-            </div>
-          </div>
-        </el-form>
-      </div>
-
-      <div class="footer-copyright">
-        Copyright © 2026 JamHoo
+        <div class="footer-copyright">
+          © 2024 智慧医疗科技股份有限公司 版权所有<br>
+          V2.0.1 Build 20240315
+        </div>
       </div>
     </div>
   </div>
@@ -188,14 +175,19 @@ import {useRouter} from 'vue-router'
 import {
   DArrowRight,
   CircleCheckFilled,
-  OfficeBuilding,
   Sunny,
   Moon,
   User,
-  Lock, Back
+  Lock,
+  Back,
+  UserFilled,
+  HelpFilled,
+  Avatar,
+  Management
 } from '@element-plus/icons-vue'
 
 const loginMode = ref('account')
+const loginRole = ref('doctor') // 新增：绑定界面的登录角色状态
 const username = ref('')
 const password = ref('')
 const rememberMe = ref(false)
@@ -268,6 +260,8 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value,
       mode: loginMode.value
+      // 业务如有需求，可将新增的 role 字段也传给后端：
+      // role: loginRole.value
     })
 
     const {token, user, roles, permissions} = res.data
@@ -314,49 +308,45 @@ const handleLogin = async () => {
   }
 }
 
-const goToRegister = () => {
-  router.push('/register')
-}
-
 onUnmounted(() => onSliderEnd())
 </script>
 
 <style scoped>
 /* ================== 主题基础变量 ================== */
 .light-theme {
-  --bg-left: linear-gradient(135deg, #e4eaf4 0%, #f4f7fc 100%);
+  --page-bg: #f0f2f5;
+  --bg-left-gradient: linear-gradient(145deg, #4a7bba 0%, #164c8a 100%);
   --bg-right: #ffffff;
-  --text-main: #404040;
-  --text-sub: #64748b;
+  --text-main: #1f2937;
+  --text-sub: #6b7280;
   --input-bg: #ffffff;
-  --input-border: #dcdfe6;
-  --input-focus: #ffffff;
-  --slider-bg: #f8fafc;
-  --slider-border: #e2e8f0;
+  --input-border: #e5e7eb;
+  --input-focus: #3b82f6;
+  --slider-bg: #f9fafb;
+  --slider-border: #e5e7eb;
   --slider-btn-bg: #ffffff;
-  --slider-btn-icon: #64748b;
-  --divider-color: #e2e8f0;
-  --tool-bg: #f1f5f9;
-  --tool-icon: #64748b;
-  --bg-img: url('@/assets/light-img.jpg');
+  --slider-btn-icon: #9ca3af;
+  --divider-color: #f3f4f6;
+  --tool-bg: #ffffff;
+  --tool-icon: #6b7280;
 }
 
 .dark-theme {
-  --bg-left: #040910;
-  --bg-right: #15181c;
-  --text-main: #e5e7eb;
-  --text-sub: #8a99a0;
-  --input-bg: transparent;
-  --input-border: #2e3338;
-  --input-focus: #2e3033;
-  --slider-bg: #1c2024;
-  --slider-border: #2e3338;
-  --slider-btn-bg: #2e3338;
-  --slider-btn-icon: #8a99a0;
-  --divider-color: #2e3338;
-  --tool-bg: #22262b;
-  --tool-icon: #8a99a0;
-  --bg-img: url('@/assets/dark-img.jpg');
+  --page-bg: #030712;
+  --bg-left-gradient: linear-gradient(145deg, #1b2c47 0%, #121f32 100%);
+  --bg-right: #111827;
+  --text-main: #f9fafb;
+  --text-sub: #9ca3af;
+  --input-bg: #1f2937;
+  --input-border: #374151;
+  --input-focus: #3b82f6;
+  --slider-bg: #1f2937;
+  --slider-border: #374151;
+  --slider-btn-bg: #374151;
+  --slider-btn-icon: #9ca3af;
+  --divider-color: #374151;
+  --tool-bg: #1f2937;
+  --tool-icon: #9ca3af;
 }
 
 /* ================== 基础整体布局 ================== */
@@ -364,20 +354,35 @@ onUnmounted(() => onSliderEnd())
   display: flex;
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--page-bg);
   transition: background-color 0.3s ease;
+  overflow: hidden;
 }
 
+/* 核心卡片布局 */
+.login-box {
+  display: flex;
+  width: 1200px;
+  height: 90%;
+  background: var(--bg-right);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* ================== 左侧品牌信息区 ================== */
 .login-left {
-  flex: 1;
-  background: var(--bg-img) no-repeat center center;
-  background-size: cover;
+  width: 45%;
+  background: var(--bg-left-gradient);
+  position: relative;
   display: flex;
   flex-direction: column;
-  position: relative;
-  transition: background 0.3s ease;
+  justify-content: center;
+  padding: 50px 40px;
 }
-
 
 .login-left::before {
   content: "";
@@ -386,212 +391,174 @@ onUnmounted(() => onSliderEnd())
   left: 0;
   right: 0;
   bottom: 0;
-  background: transparent;
-  backdrop-filter: blur(8px);
+  background: url('@/assets/ILLUSTRATION.png') no-repeat center center;
+  background-size: 98%;
+  opacity: 0.15;
+  mix-blend-mode: overlay;
   z-index: 1;
 }
 
-/* 确保内容在伪元素之上 */
-.brand-logo, .illustration-content {
+.left-content {
   position: relative;
   z-index: 2;
+  color: #ffffff;
 }
 
-.login-right {
-  width: 55%;
-  max-width: 700px;
-  background-color: var(--bg-right);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  transition: background-color 0.3s ease;
-  padding: 30px 0;
-}
-
-/* ================== 左侧品牌与插画 ================== */
-.brand-logo {
-  position: absolute;
-  top: 30px;
-  left: 40px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  z-index: 10;
-}
-
-.logo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.back-btn {
-  margin-left: 20px;
-  font-size: 12px;
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-.brand-name {
-  font-size: 18px;
-  font-weight: bold;
-  color: var(--text-main);
-  letter-spacing: 0.5px;
-}
-
-.illustration-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.logo-area {
+  margin-bottom: 50px;
   text-align: center;
-  padding: 0 40px;
 }
 
-.login-3d-img {
-  width: 100%;
-  max-width: 420px;
-  margin-bottom: 40px;
-  object-fit: contain;
-  animation: floating 4s ease-in-out infinite;
+.logo-icon-wrapper {
+  font-size: 48px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  display: inline-block;
+  line-height: 1;
 }
 
-@keyframes floating {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-.illustration-title {
-  font-size: 24px;
+.sys-title {
+  font-size: 26px;
   font-weight: 600;
-  color: var(--text-main);
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   letter-spacing: 1px;
 }
 
-.illustration-desc {
-  font-size: 15px;
-  color: var(--text-sub);
+.sys-en-title {
+  font-size: 13px;
+  opacity: 0.8;
   margin: 0;
+  letter-spacing: 0.5px;
 }
 
-/* ================== 顶部操作栏 ================== */
-/* 移动端顶部栏 */
-.mobile-top-bar {
-  display: none;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  box-sizing: border-box;
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-top: 60px;
+  padding-left: 20px;
 }
 
-.mobile-back-btn {
-  font-size: 12px;
-  border-radius: 6px;
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.mobile-brand-name {
-  font-size: 20px;
-  font-weight: bold;
-  color: var(--text-main);
-}
-
-.mobile-theme-toggle {
-  width: 32px;
-  height: 32px;
-  background: var(--tool-bg);
+.feat-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(4px);
 }
 
-/* 桌面端顶部操作栏 */
-.desktop-top-actions {
-  display: flex;
-  position: absolute;
-  top: 30px;
-  right: 40px;
+.feat-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
 }
 
-.action-pill {
+.feat-desc {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* ================== 右侧表单操作区 ================== */
+.login-right {
+  width: 55%;
+  background-color: var(--bg-right);
   display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 50px 0;
   align-items: center;
-  background: var(--tool-bg);
-  border-radius: 20px;
-  padding: 6px 14px;
-  gap: 16px;
-  border: 1px solid var(--divider-color);
 }
 
-.action-icon {
-  cursor: pointer;
-  color: var(--tool-icon);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.3s;
-}
-
-.action-icon:hover {
-  color: var(--text-main);
-}
-
-/* ================== 表单区域布局 ================== */
 .form-wrapper {
-  flex: 1;
   width: 100%;
-  max-width: 450px;
+  max-width: 380px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 20px;
-  box-sizing: border-box;
 }
 
 .welcome-text {
-  margin-bottom: 30px;
+  text-align: center;
+  margin: 20px 0;
 }
 
 .welcome-text h2 {
   color: var(--text-main);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   margin: 0 0 10px 0;
 }
 
 .welcome-text p {
   color: var(--text-sub);
-  font-size: 13px;
+  font-size: 14px;
   margin: 0;
 }
 
-/* ================== 输入框复写 ================== */
-.custom-input-item {
-  margin-bottom: 22px;
+/* 独立标签 */
+.input-label {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin-bottom: 6px;
 }
 
-:deep(.el-input__wrapper) {
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: 0 0 0 1px var(--input-border) inset !important;
-  border-radius: 6px;
-  padding: 0 15px;
-  transition: all 0.3s ease;
+/* 角色选择 UI */
+.role-container {
+  margin-bottom: 20px;
+}
+
+.role-list {
+  display: flex;
+  gap: 12px;
+}
+
+.role-item {
+  flex: 1;
   height: 44px;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-sub);
+  transition: all 0.3s ease;
+  background: var(--input-bg);
+}
+
+.role-item:hover {
+  border-color: var(--input-focus);
+}
+
+.role-item.active {
+  border-color: var(--input-focus);
+  color: var(--input-focus);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.dark-theme .role-item.active {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+/* 输入框定制化 */
+.custom-input-item {
+  margin-bottom: 20px;
 }
 
 :deep(.el-input__wrapper.is-focus) {
   box-shadow: 0 0 0 1px var(--input-focus) inset !important;
-  border: #637a9c 1px solid !important;
 }
 
 /* 自动填充样式覆盖 */
@@ -621,16 +588,16 @@ onUnmounted(() => onSliderEnd())
 }
 
 .code-btn-custom {
-  color: var(--text-main) !important;
+  color: var(--input-focus) !important;
   font-size: 13px;
   text-align: center;
   margin: 0 auto;
-  padding-left: 10px;
 }
 
 /* ================== 滑块验证 ================== */
 .slider-form-item {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
+  margin-top: 10px;
 }
 
 .slider-track {
@@ -641,14 +608,13 @@ onUnmounted(() => onSliderEnd())
   position: relative;
   overflow: hidden;
   width: 100%;
-  transition: border 0.3s, background 0.3s;
 }
 
 .slider-fill {
   position: absolute;
   height: 100%;
-  background: #31dd77;
-  opacity: 0.5;
+  background: #10b981;
+  opacity: 0.15;
   z-index: 1;
 }
 
@@ -665,9 +631,7 @@ onUnmounted(() => onSliderEnd())
 }
 
 .slider-text.is-passed {
-  color: #ffffff;
-  background-color: #56cf87;
-  border-radius: 6px;
+  color: #10b981;
 }
 
 .slider-btn {
@@ -688,19 +652,15 @@ onUnmounted(() => onSliderEnd())
 }
 
 .slider-btn.is-passed {
-  background: var(--input-focus) !important;
-  color: #fff !important;
-  border-right: none;
+  background: #10b981 !important;
 }
 
-/* ================== 表单操作项 ================== */
+/* ================== 底部操作区 ================== */
 .form-footer-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 10px;
+  margin-bottom: 15px;
 }
 
 :deep(.custom-checkbox .el-checkbox__label) {
@@ -710,7 +670,7 @@ onUnmounted(() => onSliderEnd())
 
 .forget-pwd {
   font-size: 13px;
-  color: #1677ff;
+  color: var(--input-focus);
 }
 
 .submit-btn {
@@ -718,202 +678,121 @@ onUnmounted(() => onSliderEnd())
   height: 44px;
   border-radius: 6px;
   font-size: 15px;
+  background: #2b6cf2;
+  border-color: #2b6cf2;
   letter-spacing: 2px;
 }
 
-/* 其他登录方式按钮 */
-.alt-login-buttons {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.alt-btn {
-  flex: 1;
-  height: 40px;
-  background: transparent !important;
-  border: 1px solid var(--input-border) !important;
-  color: var(--text-main) !important;
-  border-radius: 6px;
-  font-size: 13px;
-  transition: all 0.3s;
-}
-
-.alt-btn:hover {
-  border-color: rgba(83, 83, 83, 0.21) !important;
-  color: #ffffff !important;
-  background: #a6d3ff !important;
-}
-
-/* 第三方登录 */
-:deep(.custom-divider .el-divider__text) {
-  background-color: var(--bg-right);
-  color: var(--text-sub);
-  font-size: 12px;
-  padding: 0 10px;
-  transition: background-color 0.3s;
-}
-
-:deep(.custom-divider.el-divider--horizontal) {
-  border-top-color: var(--divider-color);
-  margin: 10px 0 20px 0;
-}
-
-.social-icons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.social-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-
-.social-icon:hover {
-  opacity: 0.8;
-}
-
-.register-link {
-  text-align: center;
-  font-size: 14px;
-  color: var(--text-sub);
+.submit-btn:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
 }
 
 .footer-copyright {
+  text-align: center;
   font-size: 12px;
   color: var(--text-sub);
-  margin-top: auto;
-  padding-bottom: 10px;
+  line-height: 1.6;
+  margin-bottom: 20px
+
+}
+
+/* ================== 顶部小部件 ================== */
+.desktop-top-actions {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  z-index: 10;
+}
+
+.action-pill {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  background: var(--tool-bg);
+  border-radius: 50%;
+  padding: 10px;
+  border: 1px solid var(--divider-color);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.action-icon {
+  display: flex;
+  cursor: pointer;
+  color: var(--tool-icon);
+  transition: color 0.3s;
+}
+
+.action-icon:hover {
+  color: var(--text-main);
+}
+
+.mobile-top-bar {
+  display: none;
 }
 
 /* ================== 响应式适配 ================== */
-/* 平板端适配 768px - 1200px */
-@media (max-width: 1200px) {
-  .login-left {
-    flex: 0.8;
-  }
-
-  .login-right {
-    width: 50%;
-  }
-
-  .login-3d-img {
-    max-width: 320px;
-  }
-
-  .illustration-title {
-    font-size: 20px;
-  }
-
-  .illustration-desc {
-    font-size: 14px;
-  }
-
-  .form-wrapper {
-    max-width: 400px;
+@media (max-width: 1050px) {
+  .login-box {
+    width: 90%;
+    height: auto;
+    min-height: 600px;
   }
 }
 
-/* 移动端适配 <768px */
 @media (max-width: 768px) {
+  .login-box {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    flex-direction: column;
+  }
+
   .login-left {
-    display: none !important;
+    display: none;
   }
 
   .login-right {
     width: 100%;
-    max-width: 100%;
-    padding: 20px 0;
-    height: 100dvh; /* 适配移动端动态视口高度 */
-  }
-
-  .mobile-top-bar {
-    display: flex;
+    flex: 1;
+    padding: 20px;
+    justify-content: center;
   }
 
   .desktop-top-actions {
     display: none;
   }
 
-  .form-wrapper {
-    max-width: 100%;
-    padding: 0 24px;
-    margin-top: 20px;
-  }
-
-  .welcome-text h2 {
-    font-size: 28px;
-  }
-
-  .welcome-text p {
-    font-size: 14px;
-  }
-
-  /* 触摸尺寸优化 */
-  :deep(.el-input__wrapper) {
-    height: 48px;
-  }
-
-  .slider-track {
-    height: 48px;
-  }
-
-  .slider-btn {
-    width: 48px;
-    height: 48px;
-  }
-
-  .slider-text {
-    line-height: 46px;
-    font-size: 14px;
-  }
-
-  .submit-btn {
-    height: 48px;
-    font-size: 16px;
-  }
-
-  .alt-btn {
-    height: 44px;
-    font-size: 14px;
-  }
-
-  /* 图标触摸区域放大 */
-  .social-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .social-icon svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  /* 底部安全距离适配 */
-  .footer-copyright {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-}
-
-/* 超小屏适配 <375px */
-@media (max-width: 375px) {
-  .welcome-text h2 {
-    font-size: 24px;
-  }
-
-  .form-wrapper {
-    padding: 0 20px;
+  .mobile-top-bar {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background: var(--bg-right);
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--divider-color);
   }
 
   .mobile-brand-name {
-    font-size: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .form-wrapper {
+    margin-top: 60px; /* 规避移动端头部 */
+    max-width: 100%;
+  }
+
+  .footer-copyright {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 </style>

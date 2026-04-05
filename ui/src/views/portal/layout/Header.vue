@@ -7,6 +7,7 @@
             <OfficeBuilding/>
           </el-icon>
         </div>
+
         <span class="logo-text">智慧门诊综合管理系统</span>
       </div>
 
@@ -460,10 +461,8 @@ watch(() => userStore.token, (val) => {
 }, {immediate: true})
 // --- 企业状态逻辑结束 ---
 
-const isAdmin = computed(() => userStore.roles.includes('ROLE_ADMIN'))
-const isStaff = computed(() =>
-    userStore.roles.includes('ROLE_STAFF') || userStore.roles.includes('ROLE_WORKER')
-)
+const isAdmin = computed(() => userStore.roles.includes('ROLE_ADMIN') || userStore.roles.includes('ROLE_MEDICAL_AFFAIRS'))
+const isStaff = computed(() => userStore.roles.includes('ROLE_STAFF'))
 const isEnterprise = computed(() => userStore.roles.includes('ROLE_ENTERPRISE'))
 
 const profileVisible = ref(false)

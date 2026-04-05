@@ -6,7 +6,7 @@
 
     <!--    数据库字段列表-->
     <sql id="Base_Column_List">
-        id, role_name, role_code, role_sort, create_time, update_time
+        id, role_name, role_code, role_desc, role_sort, create_time, update_time
     </sql>
 
     <!-- ResultMap -->
@@ -15,14 +15,15 @@
         <result column="role_name" property="roleName"/>
         <result column="role_code" property="roleCode"/>
         <result column="role_sort" property="roleSort"/>
+        <result column="role_desc" property="roleDesc"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <!--    添加角色-->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        insert into sys_role(role_name, role_code, role_sort, create_time, update_time)
-        values(#{roleName}, #{roleCode}, #{roleSort}, NOW(), NOW())
+        insert into sys_role(role_name, role_code, role_sort,role_desc, create_time, update_time)
+        values(#{roleName}, #{roleCode}, #{roleSort},#{roleDesc}, NOW(), NOW())
     </insert>
 
     <!--    查询角色编码-->
@@ -58,6 +59,9 @@
             </if>
             <if test="roleSort != null">
                 role_sort = #{roleSort},
+            </if>
+            <if test="roleDesc != null">
+                role_desc = #{roleDesc},
             </if>
             update_time = NOW()
         </set>

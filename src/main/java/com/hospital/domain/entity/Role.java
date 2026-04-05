@@ -33,4 +33,9 @@ public class Role extends BaseEntity implements Serializable {
 	 * 角色排序
 	 */
 	private Integer roleSort;
+
+	/**
+	 * 角色描述
+	 */
+	private String roleDesc;
 }

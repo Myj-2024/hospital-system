@@ -5,7 +5,7 @@
       <div class="hero-content">
         <h1 class="title">联系我们</h1>
         <p class="subtitle">开放共赢，智造未来。热忱欢迎优秀企业入驻，共谱产业新篇章。</p>
-        <el-tag type="info" effect="dark" round class="park-tag">Xinxin 智慧园区经济开发区管理平台</el-tag>
+        <el-tag type="info" effect="dark" round class="park-tag">智慧门诊综合管理系统</el-tag>
       </div>
     </div>
 

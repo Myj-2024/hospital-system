@@ -54,13 +54,12 @@
         <el-table-column type="selection" width="55" align="center"/>
         <el-table-column label="ID" prop="id" width="100" align="center"/>
         <el-table-column label="角色名称" prop="roleName" min-width="150" align="center"/>
-        <el-table-column label="角色编码" prop="roleCode" min-width="150" align="center">
+        <el-table-column label="角色编码" prop="roleCode" min-width="180" align="center">
           <template #default="scope">
             <el-tag type="primary" size="small" effect="dark">{{ scope.row.roleCode }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" prop="createTime" min-width="180" align="center"/>
-        <el-table-column label="更新时间" prop="updateTime" min-width="180" align="center"/>
+        <el-table-column label="角色描述" prop="roleDesc" min-width="180" align="center"/>"
         <el-table-column label="角色权重" prop="roleSort" width="120" align="center" sortable>
           <template #default="scope">
             <el-tag :type="scope.row.roleSort <= 0 ? 'danger' : 'info'" effect="dark">
@@ -68,7 +67,8 @@
             </el-tag>
           </template>
         </el-table-column>
-
+        <el-table-column label="创建时间" prop="createTime" min-width="180" align="center"/>
+        <el-table-column label="更新时间" prop="updateTime" min-width="180" align="center"/>
         <el-table-column label="操作" align="center" min-width="240" fixed="right">
           <template #default="scope">
             <el-button link type="primary" plain :icon="Edit" size="small"
@@ -112,6 +112,9 @@
           <div style="font-size: 12px; color: #ea6565; margin-top: 5px">
             编码唯一，创建后通常不修改。
           </div>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="form.roleDesc" placeholder="请输入角色描述"/>
         </el-form-item>
         <el-form-item label="角色权重" prop="roleSort">
           <el-input-number
@@ -206,6 +209,7 @@ const form = ref({
   id: null,
   roleName: '',
   roleCode: '',
+  roleDesc: '',
   roleSort: 0 // 默认值
 })
 

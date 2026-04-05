@@ -2,7 +2,7 @@
   <footer class="footer">
     <div class="footer-container">
       <div class="footer-info">
-        <h3>经济开发区管理平台</h3>
+        <h3>智慧门诊综合管理系统</h3>
         <p>地址：开发区创业大道 88 号智慧大厦</p>
         <p>电话：0512-88888888</p>
       </div>

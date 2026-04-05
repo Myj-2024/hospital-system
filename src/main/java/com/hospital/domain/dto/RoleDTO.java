@@ -34,4 +34,9 @@ public class RoleDTO implements Serializable {
 	 */
 	@NotBlank(message = "角色编码不能为空")
 	private String roleCode;
+
+	/**
+	 * 角色描述
+	 */
+	private String roleDesc;
 }

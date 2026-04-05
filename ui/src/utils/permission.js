@@ -13,7 +13,7 @@ const modules = import.meta.glob('../views/**/*.vue')
 router.beforeEach(async (to, from) => {
     NProgress.start()
 
-    const baseTitle = '经济开发区管理平台'
+    const baseTitle = '智慧门诊综合管理系统'
     document.title = to.meta.title ? `${to.meta.title} - ${baseTitle}` : baseTitle
 
     const userStore = useUserStore()

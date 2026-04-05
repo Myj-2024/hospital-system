@@ -7,7 +7,7 @@
             <OfficeBuilding/>
           </el-icon>
         </div>
-        <span class="brand-name">经济开发区管理平台</span>
+        <span class="brand-name">智慧门诊综合管理系统</span>
       </div>
 
       <div class="illustration-content">
@@ -26,7 +26,7 @@
         </el-button>
 
         <span class="mobile-brand-name">
-          经济开发区管理平台
+          智慧门诊综合管理系统
         </span>
         <div class="action-icon mobile-theme-toggle" @click="isDark = !isDark">
           <el-icon :size="16">

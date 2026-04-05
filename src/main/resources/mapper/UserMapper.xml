@@ -79,8 +79,8 @@
 
     <!--    添加用户-->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        insert into sys_user(username, password, avatar, real_name, phone, status, create_time, update_time)
-        values(#{username}, #{password}, #{avatar}, #{realName}, #{phone}, #{status}, NOW(), NOW())
+        insert into sys_user(username, password, avatar, real_name, phone,dept_id, status, create_time, update_time)
+        values(#{username}, #{password}, #{avatar}, #{realName}, #{phone},#{deptId}, #{status}, NOW(), NOW())
     </insert>
 
     <!--    修改用户-->
@@ -92,6 +92,7 @@
             <if test="realName != null and realName != ''">real_name = #{realName},</if>
             <if test="phone != null">phone = #{phone},</if>
             <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="status != null">status = #{status},</if>
             update_time = NOW()
         </set>

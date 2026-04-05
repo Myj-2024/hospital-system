@@ -27,7 +27,7 @@
     </div>
 
     <div class="footer-copyright">
-      © 2026 经济开发区管理平台
+      © 2026 智慧门诊综合管理系统
     </div>
   </div>
 </template>
